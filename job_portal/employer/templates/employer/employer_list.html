@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Employers List</title>
+    <style>
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+        }
+        table, th, td {
+            border: 1px solid black;
+        }
+        th, td {
+            padding: 10px;
+            text-align: left;
+        }
+    </style>
+</head>
+<body>
+    <h1>Employers List</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Company Name</th>
+                <th>Email</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for employer in employers %}
+                <tr>
+                    <td>{{ employer.company_name }}</td>
+                    <td>{{ employer.email }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if employers.count == 0 %}
+        <p>No employers found.</p>
+    {% endif %}
+</body>
+</html>

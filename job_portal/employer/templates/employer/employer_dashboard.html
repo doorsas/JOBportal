@@ -1,0 +1,32 @@
+{% extends 'base.html' %}
+
+{% block title %}This is Employee page{% endblock %}
+
+{% block content %}
+    <h1>Employer Dashboard</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Company Name</th>
+                <th>Email</th>
+                <th>User Name</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for employer in employers %}
+                <tr>
+                    <td>{{ employer.company_name }}</td>
+                    <td>{{ employer.email }}</td>
+                     <td>{{ employer.user }}</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% if employers.count == 0 %}
+        <p>No employers found.</p>
+    {% endif %}
+
+
+{% endblock %}
+
+

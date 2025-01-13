@@ -1,0 +1,25 @@
+
+
+
+{% extends 'base.html' %}
+
+{% block title %}This is Employee page{% endblock %}
+{% block extra_css %}
+
+{% endblock %}
+{% block content %}
+    <h1>Employee Registration</h1>
+    <form method="post">
+        {% csrf_token %}
+        {{ form.as_p }}
+            {% if form.errors %}
+        <ul style="color: red;">
+            {% for field, errors in form.errors.items %}
+                <li>{{ field }}: {{ errors|join:", " }}</li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+        <button type="submit">Register</button>
+    </form>
+
+{% endblock %}
