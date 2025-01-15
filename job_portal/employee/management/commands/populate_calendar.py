@@ -1,6 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.contrib.auth.models import User
-from job_portal.employee.models import CalendarDay
+from employee.models import CalendarDay
 from datetime import date, timedelta
 
 class Command(BaseCommand):

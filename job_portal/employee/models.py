@@ -6,12 +6,15 @@ class Employee(models.Model):
     employee_name = models.CharField(max_length=255)
     email = models.EmailField()
 
+
     def __str__(self):
         return self.employee_name
 
 
+
+
 class CV(models.Model):
-    employee = models.ForeignKey(Employee, on_delete=models.CASCADE)
+    employee = models.OneToOneField(Employee, on_delete=models.CASCADE)  # Ensures one CV per employee
     education = models.TextField()
     experience = models.TextField()
     skills = models.TextField()
@@ -20,6 +23,19 @@ class CV(models.Model):
     def __str__(self):
         return f"CV of {self.employee}"
 
+
+class CalendarDay(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)  # Link to the user
+    date = models.DateField()  # Represents the day
+    is_free = models.BooleanField(default=True)  # True if free, False otherwise
+
+    class Meta:
+        unique_together = ('user', 'date')  # Ensure each user can only have one entry per date
+        ordering = ['date']  # Sort by date
+
+    def __str__(self):
+        status = "Free" if self.is_free else "Not Free"
+        return f"{self.date} - {status}"
 
 """class EmployerProfile(models.Model):
     company_name = models.CharField(max_length=255, verbose_name="Įmonės pavadinimas")

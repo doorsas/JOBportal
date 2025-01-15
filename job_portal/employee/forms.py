@@ -10,8 +10,6 @@ class CVForm(forms.ModelForm):
         model = CV
         fields = ['education', 'experience', 'skills']
 
-
-
 class EmployeeEditForm(forms.ModelForm):
     class Meta:
         model = Employee
@@ -19,7 +17,6 @@ class EmployeeEditForm(forms.ModelForm):
 
 class EmployeeRegistrationForm(UserCreationForm):
     employee_name = forms.CharField(max_length=255, required=True)
-
     class Meta:
         model = User
         fields = ['username', 'email', 'password1', 'password2', 'employee_name']

@@ -26,5 +26,7 @@
     {% if employees.count == 0 %}
         <p>No employees found.</p>
     {% endif %}
+
+    <a href="{% url 'create_or_edit_cv' %}" class="btn btn-secondary">Create or Edit CV</a>
 {% endblock %}
 

@@ -1,10 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Calendar</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 10px;
+        }
+        .day {
+            padding: 10px;
+            text-align: center;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .free {
+            background-color: #d4edda;
+        }
+        .not-free {
+            background-color: #f8d7da;
+        }
+    </style>
 </head>
 <body>
-$END$
+
+    <h1>Your Calendar</h1>
+    <div class="calendar">
+        {% for day in calendar_days %}
+            <div class="day {% if day.is_free %}free{% else %}not-free{% endif %}"
+             data-date="{{ day.date }}">
+            {{ day.date.day }}
+            </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        $(document).ready(function () {
+            $('.day').click(function () {
+                const dayElement = $(this);
+                const date = dayElement.data('date');
+
+                $.ajax({
+                    url: "{% url 'toggle_day_status' %}",
+                    type: "POST",
+                    data: {
+                        date: date,
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                    },
+                    success: function (response) {
+                        if (response.success) {
+                            if (response.is_free) {
+                                dayElement.removeClass('not-free').addClass('free');
+                            } else {
+                                dayElement.removeClass('free').addClass('not-free');
+                            }
+                        } else {
+                            alert("Failed to toggle the day's status.");
+                        }
+                    },
+                    error: function () {
+                        alert("An error occurred. Please try again.");
+                    }
+                });
+            });
+        });
+    </script>
 </body>
 </html>
+

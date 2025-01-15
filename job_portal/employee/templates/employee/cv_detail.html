@@ -1,10 +1,13 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base.html' %}
+{% block content %}
+<div class="container mt-5">
+    <h1>CV of {{ cv.employee.employee_name }}</h1>
+    <p><strong>Education:</strong></p>
+    <p>{{ cv.education }}</p>
+    <p><strong>Experience:</strong></p>
+    <p>{{ cv.experience }}</p>
+    <p><strong>Skills:</strong></p>
+    <p>{{ cv.skills }}</p>
+    <a href="{% url 'employee_list' %}" class="btn btn-secondary">Back to Employee List</a>
+</div>
+{% endblock %}
