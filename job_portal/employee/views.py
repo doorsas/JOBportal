@@ -181,11 +181,11 @@ def generate_pdf(request):
 
     # Add content to the PDF
     pdf.drawString(300, 750, "Sutartis")
-    pdf.drawString(100, 750, "Employee and CV Details")
-    pdf.drawString(100, 720, "Jonas")  # Example, replace with actual data
-    pdf.drawString(100, 700, employee.email)
-    pdf.drawString(100, 680, "Education: BSc in Computer Science")
-    pdf.drawString(100, 660, "Skills: Python, Django")
+    pdf.drawString(100, 720, "Employee and CV Details")
+    pdf.drawString(100, 700, employee.employee_name)  # Example, replace with actual data
+    pdf.drawString(100, 680, employee.email)
+    pdf.drawString(100, 660, "Education: BSc in Computer Science")
+    pdf.drawString(100, 640, "Skills: Python, Django")
 
     # Finalize the PDF
     pdf.showPage()
