@@ -1,10 +1,14 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>Title</title>
-</head>
-<body>
-Labas
-</body>
-</html>
+{% extends 'base.html' %}
+{% block content %}
+    <div class="form-container">
+        <h1>Create JOB post</h1>
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Save JOB Post</button>
+        </form>
+    </div>
+
+{% endblock %}
+
+

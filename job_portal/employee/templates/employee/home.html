@@ -21,6 +21,7 @@
         <a href="{% url 'employee_edit' employee.id %}" class="btn btn-sm btn-warning">Edit Profile</a>
         <a href="{% url 'user_calendar' %}" class="btn btn-sm btn-warning">User Calendar</a>
         <a href="{% url 'generate_pdf' %}" class="btn btn-sm btn-secondary">Agreement example</a>
+        <a href="{% url 'employer_job_posts' %}" class="btn btn-sm btn-secondary">Employers and Job posts</a>
     {% else %}
         <p><em>No CV available for this employee.</em></p>
         <a href="{% url 'create_or_edit_cv' %}" class="btn btn-sm btn-secondary">Create CV</a>

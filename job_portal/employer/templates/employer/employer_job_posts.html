@@ -1,10 +1,34 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-5">
+    <h1>Employer List with Job Posts</h1>
+    {% for employer in employers %}
+        <div class="card mb-4">
+            <div class="card-header bg-primary text-white">
+                <h4>{{ employer.company_name }}</h4>
+                <p>Email: {{ employer.email }}</p>
+            </div>
+            <div class="card-body">
+                {% if employer.jobpost_set.all %}
+                    <h5>Job Posts:</h5>
+                    <ul class="list-group">
+                        {% for job in employer.jobpost_set.all %}
+                            <li class="list-group-item">
+                                <strong>{{ job.title }}</strong> <br>
+                                <span>{{ job.description }}</span> <br>
+                                <small>Location: {{ job.location }}</small> <br>
+                                <small>Salary: {{ job.salary_range }}</small> <br>
+                                <small>Posted on: {{ job.created_at|date:"Y-m-d H:i" }}</small>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted">No job posts available for this employer.</p>
+                {% endif %}
+            </div>
+        </div>
+    {% endfor %}
+    <button class="btn btn-secondary" onclick="window.history.back()">Back</button>
+</div>
+{% endblock %}

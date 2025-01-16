@@ -1,4 +1,3 @@
-from django.shortcuts import render, redirect
 from .forms import JobPostForm, EmployerRegistrationForm
 from .models import JobPost
 from django.contrib.auth.decorators import login_required
@@ -6,6 +5,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import Group
 from django.shortcuts import render, redirect
 from .models import Employer  # Import the Employer model
+from django.shortcuts import get_object_or_404, redirect,render
 
 def employer_register(request):
     if request.method == 'POST':
@@ -31,16 +31,25 @@ def employer_register(request):
 
 @login_required
 def create_job_post(request):
+    employer = get_object_or_404(Employer, user=request.user)
+
     if request.method == 'POST':
         form = JobPostForm(request.POST)
         if form.is_valid():
             job_post = form.save(commit=False)
-            job_post.employer = request.user.employerprofile
+            job_post.employer = employer
             job_post.save()
             return redirect('employer_dashboard')
     else:
         form = JobPostForm()
     return render(request, 'employer/create_job_post.html', {'form': form})
+
+@login_required
+def employer_job_posts(request):
+    employers = Employer.objects.prefetch_related('jobpost_set').all()
+    return render(request, 'employer/employer_job_posts.html', {'employers': employers})
+
+
 
 @login_required
 def employer_list(request):
