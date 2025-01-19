@@ -1,15 +1,16 @@
-{% extends 'base.html' %}
+{% extends 'base_employee.html' %}
 
 {% block title %}This is Employee page{% endblock %}
 
 {% block content %}
-    <h1>Employer Dashboard</h1>
+    <h1>Job Offers</h1>
     <table>
         <thead>
             <tr>
                 <th>Company Name</th>
                 <th>Email</th>
                 <th>User Name</th>
+                <th>JOB Post</th>
             </tr>
         </thead>
         <tbody>
@@ -18,15 +19,23 @@
                     <td>{{ employer.company_name }}</td>
                     <td>{{ employer.email }}</td>
                      <td>{{ employer.user }}</td>
+                    <td>
+                        {% if employer.jobpost %}
+                            <a href="{% url 'jobpost_detail' employer.jobpost.id %}" class="btn btn-sm btn-primary">View CV</a>
+                        {% else %}
+                            <span class="text-muted">No Jobs jet</span>
+                        {% endif %}
+                    </td>
+                     <td>{{ employer.jobpost.description }}</td>
                 </tr>
             {% endfor %}
         </tbody>
     </table>
     {% if employers.count == 0 %}
-        <p>No employers found.</p>
+        <p>No Job offers found.</p>
     {% endif %}
 
-<a href="{% url 'create_job_post' %}" class="btn btn-secondary">create_job_post</a>
+<a href="{% url 'home' %}" class="btn btn-secondary">Home</a>
 
 {% endblock %}
 

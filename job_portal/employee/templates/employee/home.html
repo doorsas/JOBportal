@@ -1,35 +1,36 @@
-
-
-{% extends 'base.html' %}
+{% extends 'base_employee.html' %}
 
 {% block title %}This is Employee page{% endblock %}
-
 {% block content %}
-<h1>Welcome, {{ username }}</h1>
-<h1>Your Details</h1>
-    <p><strong>Name:</strong> {{ employee.employee_name }}</p>
-    <p><strong>Email:</strong> {{ employee.email }}</p>
+<div class="d-flex justify-content-center align-items-center" style="min-height: 85vh;">
+    <div class="text-center">
+        <h1 class="mb-4">Welcome, {{ username }}</h1>
 
-    {% if cv %}
-        <h2>CV Details</h2>
-        <p><strong>Education:</strong> {{ cv.education }}</p>
-        <p><strong>Experience:</strong> {{ cv.experience }}</p>
-        <p><strong>Skills:</strong> {{ cv.skills }}</p>
-        <p><strong>Created At:</strong> {{ cv.created_at }}</p>
-        <a href="{% url 'cv_detail' employee.cv.id %}" class="btn btn-sm btn-primary">View CV</a>
-        <a href="{% url 'create_or_edit_cv' %}" class="btn btn-sm btn-secondary">Edit CV</a>
-        <a href="{% url 'employee_edit' employee.id %}" class="btn btn-sm btn-warning">Edit Profile</a>
-        <a href="{% url 'user_calendar' %}" class="btn btn-sm btn-warning">User Calendar</a>
-        <a href="{% url 'generate_pdf' %}" class="btn btn-sm btn-secondary">Agreement example</a>
-        <a href="{% url 'employer_job_posts' %}" class="btn btn-sm btn-secondary">Employers and Job posts</a>
-    {% else %}
-        <p><em>No CV available for this employee.</em></p>
-        <a href="{% url 'create_or_edit_cv' %}" class="btn btn-sm btn-secondary">Create CV</a>
+        <h2 class="mb-3">Your Details</h2>
+        <p><strong>Name:</strong> {{ employee.employee_name }}</p>
+        <p><strong>Email:</strong> {{ employee.email }}</p>
+        <p><strong>Phone:</strong> {{ employee.phone_number }}</p>
 
-
-    {% endif %}
-
-
-
-
+        {% if cv %}
+            <h2 class="mt-4">CV Details</h2>
+            <p><strong>Education:</strong> {{ cv.education }}</p>
+            <p><strong>Experience:</strong> {{ cv.experience }}</p>
+            <p><strong>Skills:</strong> {{ cv.skills }}</p>
+            <p><strong>Created At:</strong> {{ cv.created_at }}</p>
+            <div class="mt-4">
+                <a href="{% url 'employee:cv_detail' employee.cv.id %}" class="btn btn-primary btn-sm me-2">View CV</a>
+                <a href="{% url 'employee:create_or_edit_cv' %}" class="btn btn-secondary btn-sm me-2">Edit CV</a>
+                <a href="{% url 'employee:employee_edit' employee.id %}" class="btn btn-warning btn-sm me-2">Edit Profile</a>
+                <a href="{% url 'employee:user_calendar' %}" class="btn btn-warning btn-sm me-2">User Calendar</a>
+                <a href="{% url 'employee:generate_pdf' %}" class="btn btn-secondary btn-sm">Agreement Example</a>
+            </div>
+        {% else %}
+            <p class="mt-4"><em>No CV available for this employee.</em></p>
+            <div class="mt-4">
+                <a href="{% url 'employee:create_or_edit_cv' %}" class="btn btn-secondary btn-sm me-2">Create CV</a>
+                <a href="{% url 'employee:user_calendar' %}" class="btn btn-warning btn-sm">User Calendar</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
 {% endblock %}

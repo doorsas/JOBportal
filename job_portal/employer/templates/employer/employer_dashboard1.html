@@ -1,10 +1,74 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base_employee.html' %}
+
+{% block content %}
+{% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+    <div class="container my-4">
+        <h1 class="text-center mb-4">Employer Dashboard</h1>
+
+        {% for employer in employers %}
+            <div class="card mb-4 shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h2 class="h5 mb-0">{{ employer.company_name }}</h2>
+                </div>
+                <div class="card-body">
+                    <p><strong>Email:</strong> {{ employer.email }}</p>
+
+                    <h3 class="h6 mt-3">Job Posts</h3>
+                    {% if employer.jobpost_set.all %}
+                        <ul class="list-group">
+                            {% for job in employer.jobpost_set.all %}
+                                <li class="list-group-item">
+                                    <h5 class="mb-1">{{ job.title }}</h5>
+                                    <small class="text-muted">Posted on: {{ job.created_at|date:"M d, Y H:i" }}</small>
+                                    <p class="mb-1">{{ job.description }}</p>
+                                    <p class="mb-0">
+                                        <strong>Location:</strong> {{ job.location }} <br>
+                                        <strong>Salary:</strong> {{ job.salary_range }}
+                                    </p>
+                                    <!-- Submit CV Button -->
+                                    {% if request.user.is_authenticated and request.user.employee %}
+                                        <form action="{% url 'employee:submit_cv' job.id %}" method="post" class="mt-2">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-success btn-sm">Submit CV</button>
+                                        </form>
+                                    {% endif %}
+
+                                    <!-- Submitted CVs (Visible to Employers) -->
+                                    {% if request.user.is_authenticated and request.user.employer %}
+                                        <h5 class="mt-3">Submitted CVs</h5>
+                                        {% if job.submitted_cvs.all %}
+                                            <ul class="list-group">
+                                                {% for cv in job.submitted_cvs.all %}
+                                                    <li class="list-group-item">
+                                                        <strong>Employee:</strong> {{ cv.employee.employee_name }} {{ cv.employee.employee_surname }}<br>
+                                                        <strong>Email:</strong> {{ cv.employee.email }}<br>
+                                                        <a href="{% url 'employer:view_cv' cv.id %}" class="btn btn-link btn-sm">View CV</a>
+                                                    </li>
+                                                {% endfor %}
+                                            </ul>
+                                        {% else %}
+                                            <p class="text-muted">No CVs submitted yet.</p>
+                                        {% endif %}
+                                    {% endif %}
+                                </li>
+                            {% endfor %}
+                        </ul>
+                    {% else %}
+                        <p class="text-muted">No job posts available.</p>
+                    {% endif %}
+                </div>
+            </div>
+        {% endfor %}
+
+
+{% endblock %}

@@ -61,3 +61,42 @@ table {
         h1 {
             text-align: center;
         }
+
+.calendar {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
+}
+.day {
+    padding: 10px;
+    text-align: center;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    cursor: pointer;
+}
+.free {
+    background-color: #d4edda;
+}
+.not-free {
+    background-color: #f8d7da;
+}
+
+.bg-gradient {
+    background: linear-gradient(90deg, #343a40, #495057);
+}
+
+.nav-link:hover {
+    text-decoration: underline;
+    color: #f8f9fa !important;
+}
+
+.navbar-brand i {
+    margin-right: 8px;
+    color: #ffc107;
+}
+
+.btn-outline-light:hover {
+    background-color: #ffc107;
+    border-color: #ffc107;
+    color: #343a40;
+}

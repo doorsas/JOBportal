@@ -11,20 +11,13 @@ from reportlab.pdfgen import canvas
 from .models import CalendarDay
 from datetime import date, timedelta
 from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
+from employer.models import JobPost  # Import JobPost from employer app
 
-# def create_cv(request):
-#     if request.method == 'POST':
-#         form = CVForm(request.POST)
-#         if form.is_valid():
-#             cv = form.save(commit=False)
-#             cv.employee = request.user.employeeprofile
-#             cv.save()
-#             return redirect('employee_dashboard')
-#     else:
-#         form = CVForm()
-#     return render(request, 'employee/create_or_edit_cv.html', {'form': form})
 
+
+@login_required
 def create_or_edit_cv(request):
     employee = get_object_or_404(Employee, user=request.user)
     cv, created = CV.objects.get_or_create(employee=employee)
@@ -33,7 +26,7 @@ def create_or_edit_cv(request):
         form = CVForm(request.POST, instance=cv)
         if form.is_valid():
             form.save()
-            return redirect('employee_dashboard')  # Redirect to the employee dashboard or list
+            return redirect('employer_dashboard')  # Redirect to the employee dashboard or list
     else:
         form = CVForm(instance=cv)
 
@@ -53,7 +46,7 @@ def home(request):
         employee = get_object_or_404(Employee, user=request.user)
         cv = get_object_or_404(CV, employee=employee)
         return render(request, 'employee/home.html', {
-        'username': request.user.username, 'employee': employee, 'cv':cv } )
+        'username': request.user.username, 'employee':employee, 'cv':cv })
     except :
         return render(request, 'employee/home.html', {
         'username': request.user.username} )
@@ -84,7 +77,7 @@ def employee_edit(request, pk):
         form = EmployeeEditForm(request.POST, instance=employee)
         if form.is_valid():
             form.save()
-            return redirect('employee_list')  # Redirect back to list
+            return redirect('employer_dashboard')  # Redirect back to list
     else:
         form = EmployeeEditForm(instance=employee)
     return render(request, 'employee/employee_edit.html', {'form': form})
@@ -94,7 +87,7 @@ def employee_delete(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
     if request.method == 'POST':
         employee.delete()
-        return redirect('employee_list')  # Redirect back to list
+        return redirect('home')  # Redirect back to list
 
 def employee_register(request):
     if request.method == 'POST':
@@ -146,15 +139,15 @@ def login_employee(request):
 
                 # Check if the user has an associated Employee profile
                 if hasattr(user, 'employee'):
-                    return redirect('employee_dashboard')  # Redirect to Employee dashboard
+                    return redirect('employer:employer_dashboard')  # Redirect to Employee dashboard
 
                 # Check if the user has an associated Employer profile
                 elif hasattr(user, 'employer'):
-                    return redirect('employer_dashboard')  # Redirect to Employer dashboard
+                    return redirect('employer:create_job_post')  # Redirect to Employer dashboard
 
                 # If neither profile exists, you can add a fallback
                 messages.error(request, 'No profile associated with this account.')
-                return redirect('home')
+                return redirect('employee:home')
             else:
                 messages.error(request, 'Invalid username or password.')
     else:
@@ -170,7 +163,7 @@ def logout_employee(request):
     return redirect('login_employee')
 
 
-
+@login_required
 def generate_pdf(request):
     # Create the HTTP response with the PDF headers
     response = HttpResponse(content_type='application/pdf')
@@ -180,7 +173,7 @@ def generate_pdf(request):
     pdf = canvas.Canvas(response)
 
     # Add content to the PDF
-    pdf.drawString(300, 750, "Sutartis")
+    pdf.drawString(250, 750, "Sutartis  Vilnius 2025 ")
     pdf.drawString(100, 720, "Employee and CV Details")
     pdf.drawString(100, 700, employee.employee_name)  # Example, replace with actual data
     pdf.drawString(100, 680, employee.email)
@@ -218,22 +211,53 @@ def user_calendar(request):
 
 
 @login_required
+@csrf_exempt
 def toggle_day_status(request):
     if request.method == "POST":
-        date = request.POST.get('date')  # Date from the frontend
+        date = request.POST.get('date')
+        print (date)
+
+        if not date:
+            return JsonResponse({'success': False, 'error': 'Date not provided'})
+
         try:
-            # Ensure the date is in YYYY-MM-DD format
-            formatted_date = datetime.strptime(date, "%b. %d, %Y").strftime("%Y-%m-%d")
+            parsed_date = datetime.strptime(date, "%Y-%m-%d").date()
         except ValueError:
-            return JsonResponse({'success': False, 'error': 'Invalid date format.'})
+            return JsonResponse({'success': False, 'error': 'Invalid date format'})
 
-        user = request.user
-        calendar_day, created = CalendarDay.objects.get_or_create(user=user, date=formatted_date)
+        try:
+            # Use `filter()` and handle duplicates if any remain
+            day = CalendarDay.objects.get(date=parsed_date)
+            print (day)
+            day.is_free = not day.is_free
+            day.save()
+            return JsonResponse({'success': True, 'is_free': day.is_free})
+        except CalendarDay.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Day not found'})
+        except CalendarDay.MultipleObjectsReturned:
+            return JsonResponse({'success': False, 'error': 'Duplicate entries found. Please fix the database.'})
+    else:
+        return JsonResponse({'success': False, 'error': 'Invalid request method'})
 
-        # Toggle the `is_free` status
-        calendar_day.is_free = not calendar_day.is_free
-        calendar_day.save()
 
-        return JsonResponse({'success': True, 'is_free': calendar_day.is_free})
 
-    return JsonResponse({'success': False, 'error': 'Invalid request method.'})
+@login_required
+def submit_cv(request, job_id):
+    # Get the job post
+    job = get_object_or_404(JobPost, id=job_id)
+
+    # Ensure the user is an employee and has a CV
+    try:
+        employee = request.user.employee
+        cv = employee.cv
+    except (Employee.DoesNotExist, CV.DoesNotExist):
+        messages.error(request, "You must have a CV to apply for a job.")
+        return redirect('employer:employer_dashboard')
+
+    # Add the CV to the job post's submissions
+    job.submitted_cvs.add(cv)
+
+    # Add a success message
+    messages.success(request, f"You have successfully applied for the job: {job.title}.")
+
+    return redirect('employer:employer_dashboard')

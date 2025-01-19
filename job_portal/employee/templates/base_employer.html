@@ -13,7 +13,7 @@
 <body>
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3 shadow-sm">
     <div class="container">
-        <a class="navbar-brand fw-bold fs-4" href="{% url 'home' %}">Portalas</a>
+        <a class="navbar-brand fw-bold fs-4" href="{% url 'employee:home' %}">Portalas</a>
         <button
             class="navbar-toggler"
             type="button"
@@ -28,23 +28,22 @@
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
                 <li class="nav-item mx-2">
-                    <a class="nav-link text-light fs-5" href="{% url 'employee_register' %}">Register as Employee</a>
+                    <a class="nav-link text-light fs-5" href="{% url 'employer:employer_register' %}">Register as Employer</a>
                 </li>
                 <li class="nav-item mx-2">
-                    <a class="nav-link text-light fs-5" href="{% url 'employer_register' %}">Register as Employer</a>
-                </li>
-                <li class="nav-item mx-2">
-                    <a class="nav-link text-light fs-5" href="{% url 'employee_dashboard' %}">Employee Dashboard</a>
-                </li>
-                <li class="nav-item mx-2">
-                    <a class="nav-link text-light fs-5" href="{% url 'employer_dashboard' %}">Employer Dashboard</a>
+                    <a class="nav-link text-light fs-5" href="{% url 'employer:create_job_post' %}">Create Job post</a>
                 </li>
                  <li class="nav-item mx-2">
-                    <a class="nav-link text-light fs-5" href="{% url 'employee_list' %}">Employee List</a>
+                    <a class="nav-link text-light fs-5" href="{% url 'employee:employee_list' %}">Employee List</a>
                 </li>
                 <li class="nav-item mx-2">
-                    <a class="btn btn-outline-light btn-sm fw-bold px-3" href="{% url 'logout' %}">Log Out</a>
+                    <a class="btn btn-outline-light btn-sm fw-bold px-3" href="{% url 'employee:logout' %}">Log Out</a>
                 </li>
+                                <li class="nav-item mx-2">
+                    <a class="btn btn-outline-light btn-sm fw-bold px-3" href="{% url 'employer:employer_job_posts1' %}">Log Out</a>
+                </li>
+                <a href="{% url 'employer:employer_job_posts1' %}" class="nav-link">My Job Posts</a>
+
             </ul>
         </div>
     </div>

@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base_employee.html' %}
 
 {% block content %}
 <div class="container mt-5">
@@ -6,10 +6,11 @@
     <form method="post" class="needs-validation" novalidate>
         {% csrf_token %}
         {{ form.as_p }}
-        <div class="mt-3">
-            <button type="submit" class="btn btn-primary">Save Changes</button>
-            <a href="{% url 'employee_list' %}" class="btn btn-secondary">Cancel</a>
+        <div class="mt-3 d-flex justify-content-start gap-3">
+            <button type="submit" class="btn btn-primary btn-lg">Save Changes</button>
+            <a href="{% url 'employee:home' %}" class="btn btn-secondary btn-lg">Cancel</a>
         </div>
     </form>
 </div>
+
 {% endblock %}

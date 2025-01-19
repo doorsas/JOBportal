@@ -1,10 +1,29 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container py-5">
+    <h1>Job Posts by {{ employer.company_name }}</h1>
+    <p>Email: {{ employer.email }}</p>
+
+    {% if job_posts %}
+        <div class="row">
+            {% for job in job_posts %}
+                <div class="col-md-6">
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ job.title }}</h5>
+                            <p class="card-text">{{ job.description|truncatechars:150 }}</p>
+                            <p><strong>Location:</strong> {{ job.location }}</p>
+                            <p><strong>Salary Range:</strong> {{ job.salary_range }}</p>
+                            <p><small>Posted on {{ job.created_at|date:"M d, Y" }}</small></p>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p>No job posts found for this employer.</p>
+    {% endif %}
+</div>
+{% endblock %}
+

@@ -1,14 +1,22 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+from django.db import models
+from django.contrib.auth.models import User
+
 class Employee(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)  # Link to User
     employee_name = models.CharField(max_length=255)
+    employee_surname = models.CharField(max_length=255, blank=True, null=True,default="Unknown")  # New field
     email = models.EmailField()
-
+    citizenship = models.CharField(max_length=100, blank=True, null=True, default="Unknown")  # New field
+    national_id = models.IntegerField( blank=True, null=True, unique=True)
+    receive_special_offers = models.BooleanField(default=False,)  # New field
+    phone_number = models.CharField(max_length=20, blank=True, null=True, default="Unknown")  # New field
 
     def __str__(self):
-        return self.employee_name
+        return f"{self.employee_name} {self.employee_surname or ''}"
+
 
 
 

@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
 
+app_name = 'employee'
+
 urlpatterns = [
     path('', views.login_employee, name='login_employee'),
     path('home/', views.home, name='home'),
@@ -17,4 +19,8 @@ urlpatterns = [
     path('generate-pdf/', views.generate_pdf, name='generate_pdf'),
     path('calendar/', views.user_calendar, name='user_calendar'),
     path('toggle-day-status/', views.toggle_day_status, name='toggle_day_status'),
+    path('submit-cv/<int:job_id>/', views.submit_cv, name='submit_cv'),
+
+
+
 ]

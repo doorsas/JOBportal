@@ -1,10 +1,21 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+
+
+{% extends 'base_employer.html' %}
+
+{% block title %}This is Employee page{% endblock %}
+
+{% block content %}
+<h1>Welcome, {{ username }}</h1>
+<h1>Your Details</h1>
+    <p><strong>Name:</strong> {{ employer.company_name }}</p>
+    <p><strong>Email:</strong> {{ employer.email }}</p>
+
+
+    <a href="{% url 'create_job_post' %}" class="btn btn-sm btn-primary">Create new job Post</a>
+    {% if cv %}
+    <a href="{% url 'employer_job_posts' employer.id  %}" class="btn btn-sm btn-secondary">View all Your job Posts</a>
+    {% else %}
+    <p><em>No Job posts available for this employer.</em></p>
+    {% endif %}
+
+{% endblock %}}
