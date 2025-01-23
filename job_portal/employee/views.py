@@ -14,6 +14,15 @@ from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
 from employer.models import JobPost  # Import JobPost from employer app
+from django.shortcuts import render, get_object_or_404
+from django.http import JsonResponse
+from .models import Calendar, Booking
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.dateparse import parse_date
+# from dateutil.parser import parse as parse_date
+from django.utils.dateparse import parse_date as django_parse_date
+import json
+from calendar import Calendar as Cal
 
 
 
@@ -26,7 +35,7 @@ def create_or_edit_cv(request):
         form = CVForm(request.POST, instance=cv)
         if form.is_valid():
             form.save()
-            return redirect('employer_dashboard')  # Redirect to the employee dashboard or list
+            return redirect('employer:employer_dashboard')  # Redirect to the employee dashboard or list
     else:
         form = CVForm(instance=cv)
 
@@ -186,27 +195,27 @@ def generate_pdf(request):
 
     return response
 
-@login_required
-def user_calendar(request):
-    # Get all calendar entries for the logged-in user
-    today = date.today()
-    start_date = today.replace(day=1)  # Start of the current month
-    end_date = start_date + timedelta(days=32)  # Go slightly beyond the current month to get all days
-    end_date = end_date.replace(day=1) - timedelta(days=1)  # End of the current month
-
-    days = CalendarDay.objects.filter(user=request.user, date__range=(start_date, end_date))
-
-    # Create a dictionary of days for quick lookup
-    day_status = {day.date: day.is_free for day in days}
-
-    # Generate a list of all days in the current month
-    calendar_days = []
-    for day in range(1, end_date.day + 1):
-        current_date = start_date.replace(day=day)
-        is_free = day_status.get(current_date, True)  # Default to free if no entry exists
-        calendar_days.append({'date': current_date, 'is_free': is_free})
-
-    return render(request, 'employee/calendar.html', {'calendar_days': calendar_days})
+# @login_required
+# def user_calendar(request):
+#     # Get all calendar entries for the logged-in user
+#     today = date.today()
+#     start_date = today.replace(day=1)  # Start of the current month
+#     end_date = start_date + timedelta(days=32)  # Go slightly beyond the current month to get all days
+#     end_date = end_date.replace(day=1) - timedelta(days=1)  # End of the current month
+#
+#     days = CalendarDay.objects.filter(user=request.user, date__range=(start_date, end_date))
+#
+#     # Create a dictionary of days for quick lookup
+#     day_status = {day.date: day.is_free for day in days}
+#
+#     # Generate a list of all days in the current month
+#     calendar_days = []
+#     for day in range(1, end_date.day + 1):
+#         current_date = start_date.replace(day=day)
+#         is_free = day_status.get(current_date, True)  # Default to free if no entry exists
+#         calendar_days.append({'date': current_date, 'is_free': is_free})
+#
+#     return render(request, 'employee/calendar.html', {'calendar_days': calendar_days})
 
 
 
@@ -261,3 +270,68 @@ def submit_cv(request, job_id):
     messages.success(request, f"You have successfully applied for the job: {job.title}.")
 
     return redirect('employer:employer_dashboard')
+
+
+
+from django.http import HttpResponseBadRequest
+
+from dateutil.parser import parse as parse_date
+from django.utils.dateparse import parse_date as django_parse_date
+
+@csrf_exempt
+def toggle_booking(request, date_str):
+    if request.method == 'POST':
+        try:
+            # Attempt to parse the date string into a date object
+            date_obj = parse_date(date_str).date() if parse_date(date_str) else None
+        except (ValueError, TypeError):
+            return JsonResponse({'error': 'Invalid date format'}, status=400)
+
+        if not date_obj:
+            return JsonResponse({'error': 'Invalid date format'}, status=400)
+
+        calendar = get_object_or_404(Calendar, user=request.user)
+        booking, created = Booking.objects.get_or_create(calendar=calendar, date=date_obj)
+
+        # Toggle booking status
+        booking.is_booked = not booking.is_booked
+        print (booking.is_booked)
+        booking.save()
+
+        total_booked = calendar.bookings.filter(is_booked=True).count()
+
+        return JsonResponse({'status': 'success', 'is_booked': booking.is_booked, 'date': date_obj.isoformat(),'total_booked':total_booked})
+
+    return JsonResponse({'error': 'Invalid request method'}, status=405)
+
+
+
+
+@login_required
+def user_calendar(request):
+    # Get the user's calendar
+    calendar = get_object_or_404(Calendar, user=request.user)
+
+    # Get all dates from the calendar (convert from ISO string to date objects)
+    all_dates = [date.fromisoformat(day) for day in calendar.dates]
+
+    # Create a dictionary of bookings (map date to is_booked)
+    bookings = {booking.date: booking.is_booked for booking in calendar.bookings.all()}
+
+    # Group dates into weeks
+    calendar_weeks = []
+    week = []
+    for day in all_dates:
+        is_booked = bookings.get(day, False)
+        week.append({'date': day, 'is_booked': is_booked})
+        if len(week) == 7:  # Week has 7 days
+            calendar_weeks.append(week)
+            week = []
+    if week:  # Add any remaining days as the last week
+        calendar_weeks.append(week)
+
+    total_booked = calendar.bookings.filter(is_booked=True).count()
+
+    # Pass weeks to the template
+    context = {'calendar_weeks': calendar_weeks, 'total_booked':total_booked}
+    return render(request, 'employee/calendar.html', context)

@@ -84,19 +84,32 @@ table {
 .bg-gradient {
     background: linear-gradient(90deg, #343a40, #495057);
 }
-
-.nav-link:hover {
-    text-decoration: underline;
-    color: #f8f9fa !important;
+.navbar {
+    background-color: #343a40;
+    padding: 1rem 0;
 }
 
-.navbar-brand i {
-    margin-right: 8px;
+.navbar-brand {
     color: #ffc107;
+    font-weight: bold;
 }
 
-.btn-outline-light:hover {
-    background-color: #ffc107;
-    border-color: #ffc107;
-    color: #343a40;
+.navbar-nav .nav-link {
+    color: #fff;
+}
+
+.navbar-toggler {
+    border-color: #fff;
+}
+
+.navbar-toggler-icon {
+    background-color: #fff;
+}
+
+.my-custom-navbar {
+    background-color: #f0f0f0; /* Example: Light gray background */
+}
+
+.my-custom-navbar .nav-link {
+    color: #333; /* Example: Darker text color */
 }

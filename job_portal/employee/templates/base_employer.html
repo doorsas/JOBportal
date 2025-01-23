@@ -11,7 +11,7 @@
     {% block extra_css %}{% endblock %}
 </head>
 <body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3 shadow-sm">
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark py-3 shadow-sm my-custom-navbar">
     <div class="container">
         <a class="navbar-brand fw-bold fs-4" href="{% url 'employee:home' %}">Portalas</a>
         <button
@@ -30,6 +30,10 @@
                 <li class="nav-item mx-2">
                     <a class="nav-link text-light fs-5" href="{% url 'employer:employer_register' %}">Register as Employer</a>
                 </li>
+                <li class="nav-item mx-2">
+                    <a class="nav-link text-light fs-5" href="{% url 'employer:employer_job_posts1' %}">View My job posts</a>
+                </li>
+
                 <li class="nav-item mx-2">
                     <a class="nav-link text-light fs-5" href="{% url 'employer:create_job_post' %}">Create Job post</a>
                 </li>

@@ -3,6 +3,14 @@ from django.contrib.auth.models import User
 
 from django.db import models
 from django.contrib.auth.models import User
+from datetime import date, timedelta
+
+
+from django.db import models
+
+# credit_card = EncryptedCharField(max_length=16)
+
+
 
 class Employee(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)  # Link to User
@@ -27,6 +35,8 @@ class CV(models.Model):
     experience = models.TextField()
     skills = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    # additional_documents
+
 
     def __str__(self):
         return f"CV of {self.employee}"
@@ -62,3 +72,22 @@ class CalendarDay(models.Model):
         verbose_name = "Darbdavio profilis"
         verbose_name_plural = "Darbdavių profiliai"
         ordering = ['-created_at']"""
+
+
+
+
+
+# Models
+def get_default_calendar_dates():
+    # Generate the next 30 days as default calendar dates
+    today = date.today()
+    return [(today + timedelta(days=i)).isoformat() for i in range(30)]  # Convert to ISO format strings
+
+class Calendar(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='calendar')
+    dates = models.JSONField(default=get_default_calendar_dates)
+
+class Booking(models.Model):
+    calendar = models.ForeignKey(Calendar, on_delete=models.CASCADE, related_name='bookings')
+    date = models.DateField()
+    is_booked = models.BooleanField(default=False)

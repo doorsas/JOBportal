@@ -1,49 +1,120 @@
 {% extends 'base.html' %}
 
-  <!-- Load CSRF token library -->
+{% block extra_css %}
+<style>
+    #calendar-container {
+        width: 100%;
+        max-width: 600px;
+        margin: 20px auto;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    #calendar {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .calendar-header, .calendar-row {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+    }
+
+    .calendar-header {
+        background-color: #f4f4f4;
+        font-weight: bold;
+        text-align: center;
+        padding: 8px 0;
+    }
+
+    .calendar-body {
+        background-color: #fff;
+    }
+
+    .day {
+        text-align: center;
+        padding: 15px;
+        border: 1px solid #ddd;
+        cursor: pointer;
+    }
+
+    .day:hover {
+        background-color: #f0f8ff;
+    }
+
+    .day.booked {
+        background-color: #90ee90;
+        color: #fff;
+        font-weight: bold;
+    }
+</style>
+{% endblock %}
+
 
 {% block content %}
-<h1>Your Calendar of January</h1>
-<div class="calendar">
-    {% for day in calendar_days %}
-        <div class="day {% if day.is_free %}free{% else %}not-free{% endif %}"
-             data-date="{{ day.date|date:'Y-m-d' }}">
-            {{ day.date.day }}
-        </div>
-    {% endfor %}
+
+<h1>Your Booking Calendar</h1>
+<div id="calendar-summary">
+    <p id="booked-count">Total Booked Days: {{ total_booked }}</p>
 </div>
+<div id="calendar-container">
+    <div id="calendar">
+        <div class="calendar-header">
+            <div>Sun</div>
+            <div>Mon</div>
+            <div>Tue</div>
+            <div>Wed</div>
+            <div>Thu</div>
+            <div>Fri</div>
+            <div>Sat</div>
+        </div>
+        <div class="calendar-body">
+            {% for week in calendar_weeks %}
+                <div class="calendar-row">
+                    {% for day in week %}
+                        <div class="day {% if day.is_booked %}booked{% endif %}" data-date="{{ day.date }}">
+                            {{ day.date|date:"d" }}
+                            <br>
+                            {% if day.is_booked %}
+                                Booked
+                            {% else %}
+                                Free
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+                </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
 {% endblock %}
 
 {% block extra_js %}
 <script>
-    $(document).ready(function () {
-        $('.day').click(function () {
-            const dayElement = $(this);
-            const date = dayElement.data('date');
+document.querySelectorAll('.day').forEach(dayElement => {
+    dayElement.addEventListener('click', () => {
+        const date = dayElement.dataset.date; // Should be in YYYY-MM-DD format
+        fetch(`/employee/calendar/toggle-booking/${date}/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': '{{ csrf_token }}' },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === 'success') {
+                // Toggle the visual state of the day
+                dayElement.classList.toggle('booked');
+                dayElement.innerHTML = `${data.date} - ${data.is_booked ? 'Booked' : 'Free'}`;
 
-            $.ajax({
-                url: "{% url 'toggle_day_status' %}",
-                type: "POST",
-                data: {
-                    date: date,
-                    csrfmiddlewaretoken: '{{ csrf_token }}',  <!-- Include CSRF token here -->
-                },
-                success: function (response) {
-                    if (response.success) {
-                        if (response.is_free) {
-                            dayElement.removeClass('not-free').addClass('free');
-                        } else {
-                            dayElement.removeClass('free').addClass('not-free');
-                        }
-                    } else {
-                        alert("Failed to toggle the day's status: " + (response.error || "Unknown error"));
-                    }
-                },
-                error: function () {
-                    alert("An error occurred. Please try again.");
-                }
-            });
+                // Update the total booked count
+                const bookedCountElement = document.getElementById('booked-count');
+                bookedCountElement.textContent = `Total Booked Days: ${data.total_booked}`;
+            }
         });
     });
+});
+
 </script>
 {% endblock %}
