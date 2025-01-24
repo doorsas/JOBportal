@@ -1,20 +1,26 @@
 {% extends 'base_employee.html' %}
 
+{% block title %}Employer Dashboard{% endblock %}
+
 {% block content %}
-{% if messages %}
-    <div class="container mt-3">
-        {% for message in messages %}
-            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                {{ message }}
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+<div class="d-flex justify-content-center align-items-center" style="min-height: 85vh;">
+    <div class="text-center bg-light p-5 rounded shadow" style="width: 90%; max-width: 1200px;">
+        <!-- Messages -->
+        {% if messages %}
+            <div class="container mt-3">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
             </div>
-        {% endfor %}
-    </div>
-{% endif %}
+        {% endif %}
 
-    <div class="container my-4">
-        <h1 class="text-center mb-4">Employer Dashboard</h1>
+        <!-- Dashboard Heading -->
+        <h1 class="mb-4 display-4">Employer Dashboard</h1>
 
+        <!-- Employer Cards -->
         {% for employer in employers %}
             <div class="card mb-4 shadow-sm">
                 <div class="card-header bg-primary text-white">
@@ -23,6 +29,7 @@
                 <div class="card-body">
                     <p><strong>Email:</strong> {{ employer.email }}</p>
 
+                    <!-- Job Posts Section -->
                     <h3 class="h6 mt-3">Job Posts</h3>
                     {% if employer.jobpost_set.all %}
                         <ul class="list-group">
@@ -35,7 +42,8 @@
                                         <strong>Location:</strong> {{ job.location }} <br>
                                         <strong>Salary:</strong> {{ job.salary_range }}
                                     </p>
-                                    <!-- Submit CV Button -->
+
+                                    <!-- Submit CV Button (Visible to Employees) -->
                                     {% if request.user.is_authenticated and request.user.employee %}
                                         <form action="{% url 'employee:submit_cv' job.id %}" method="post" class="mt-2">
                                             {% csrf_token %}
@@ -43,7 +51,7 @@
                                         </form>
                                     {% endif %}
 
-                                    <!-- Submitted CVs (Visible to Employers) -->
+                                    <!-- Submitted CVs Section (Visible to Employers) -->
                                     {% if request.user.is_authenticated and request.user.employer %}
                                         <h5 class="mt-3">Submitted CVs</h5>
                                         {% if job.submitted_cvs.all %}
@@ -69,6 +77,6 @@
                 </div>
             </div>
         {% endfor %}
-
-
+    </div>
+</div>
 {% endblock %}

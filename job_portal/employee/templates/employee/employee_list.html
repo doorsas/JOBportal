@@ -1,11 +1,92 @@
 {% extends 'base_employer.html' %}
 
+{% block title %}Employee List{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Custom Table Styles */
+    .employee-table {
+        width: 100%;
+        margin: 20px auto;
+        border-collapse: collapse;
+        font-family: Arial, sans-serif;
+        font-size: 14px;
+        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1); /* Subtle shadow for depth */
+        border-radius: 5px; /* Rounded corners */
+        overflow: hidden; /* Ensures rounded corners are visible */
+    }
+
+    .employee-table th, .employee-table td {
+        padding: 12px 15px;
+        text-align: left;
+        border: 1px solid #ddd;
+    }
+
+    .employee-table th {
+        background-color: #6a11cb; /* Gradient color for header */
+        color: #fff; /* White text for contrast */
+        font-weight: bold;
+    }
+
+    .employee-table tr:nth-child(even) {
+        background-color: #f9f9f9; /* Alternate row color */
+    }
+
+    .employee-table tr:hover {
+        background-color: #f1f1f1; /* Hover effect for rows */
+        cursor: pointer;
+    }
+
+    .employee-table .btn {
+        margin: 2px;
+        font-size: 0.875rem; /* Smaller font size for buttons */
+        padding: 5px 10px; /* Smaller padding for buttons */
+    }
+
+    .employee-table .btn-primary {
+        background-color: #6a11cb; /* Purple background for primary button */
+        border: none;
+    }
+
+    .employee-table .btn-primary:hover {
+        background-color: #2575fc; /* Blue background on hover */
+    }
+
+    .employee-table .btn-warning {
+        background-color: #ffc107; /* Yellow background for warning button */
+        border: none;
+    }
+
+    .employee-table .btn-warning:hover {
+        background-color: #e0a800; /* Darker yellow on hover */
+    }
+
+    .employee-table .btn-danger {
+        background-color: #dc3545; /* Red background for danger button */
+        border: none;
+    }
+
+    .employee-table .btn-danger:hover {
+        background-color: #c82333; /* Darker red on hover */
+    }
+
+    .employee-table .text-muted {
+        color: #6c757d; /* Muted text color */
+    }
+
+    .employee-table .d-flex {
+        display: flex;
+        gap: 5px; /* Spacing between buttons */
+    }
+</style>
+{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
-    <h1>Employee List</h1>
+    <h1 class="text-center mb-4">Employee List</h1>
     <div class="table-responsive">
-        <table class="table table-bordered table-hover">
-            <thead class="thead-light">
+        <table class="employee-table">
+            <thead>
                 <tr>
                     <th>ID</th>
                     <th>Name</th>
@@ -22,28 +103,24 @@
                     <td>{{ employee.email }}</td>
                     <td>
                         {% if employee.cv %}
-                            <a href="{% url 'employee:cv_detail' employee.cv.id %}" class="btn btn-sm btn-primary">View CV</a>
+                            <a href="{% url 'employee:cv_detail' employee.cv.id %}" class="btn btn-primary">View CV</a>
                         {% else %}
                             <span class="text-muted">No CV</span>
                         {% endif %}
                     </td>
-<td>
-    <div class="d-flex flex-column">
-        <a href="{% url 'employee:employee_edit' employee.id %}" class="btn btn-sm btn-warning w-100 mb-1">Edit</a>
-        <form action="{% url 'employee:employee_delete' employee.id %}" method="post" class="w-100">
-            {% csrf_token %}
-            <button type="submit" class="btn btn-sm btn-danger w-100" onclick="return confirm('Are you sure you want to delete this employee?');">Delete</button>
-        </form>
-    </div>
-</td>
-
+                    <td>
+                        <div class="d-flex">
+                            <a href="{% url 'employee:employee_edit' employee.id %}" class="btn btn-warning">Edit</a>
+                            <form action="{% url 'employee:employee_delete' employee.id %}" method="post">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-danger" onclick="return confirm('Are you sure you want to delete this employee?');">Delete</button>
+                            </form>
+                        </div>
+                    </td>
                 </tr>
                 {% endfor %}
             </tbody>
         </table>
     </div>
 </div>
-
 {% endblock %}
-
-

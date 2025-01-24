@@ -4,11 +4,23 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import AuthenticationForm
 
-
+#
+# class CVForm(forms.ModelForm):
+#     class Meta:
+#         model = CV
+#         fields = ['education', 'experience', 'skills']
+#
 class CVForm(forms.ModelForm):
     class Meta:
         model = CV
-        fields = ['education', 'experience', 'skills']
+        fields = [
+            'education', 'experience', 'skills', 'name_surname', 'date_and_place_of_birth',
+            'place_of_residence', 'contacts', 'languages', 'civil_status', 'professional_experience',
+            'other_relevant_information', 'characteristics', 'hobby', 'attachment'
+        ]
+        widgets = {
+            'attachment': forms.ClearableFileInput(attrs={'accept': '.pdf,.doc,.docx,.jpg,.png'}),
+        }
 
 class EmployeeEditForm(forms.ModelForm):
     class Meta:

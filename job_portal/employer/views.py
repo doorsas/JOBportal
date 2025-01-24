@@ -92,7 +92,7 @@ def employer_job_posts1(request):
     try:
         employer = request.user.employer
     except Employer.DoesNotExist:
-        return render(request, "employer/error.html", {"message": "You are not authorized to view this page."})
+        return render(request, "employer/error.html", {"message": "You are Employee. You are not authorized to view this page."})
 
     # Fetch all job posts for this employer
     job_posts = JobPost.objects.filter(employer=employer).prefetch_related('submitted_cvs')

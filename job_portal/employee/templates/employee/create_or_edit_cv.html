@@ -1,12 +1,120 @@
 {% extends 'base_employee.html' %}
-{% block content %}
-    <div class="form-container">
-        <h1>Create or edit Your CV</h1>
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Save CV</button>
-        </form>
-    </div>
 
+{% block title %}Create or Edit CV{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Custom Form Styles */
+    .form-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .form-container h1 {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        font-size: 2rem;
+        color: #343a40;
+    }
+
+    .form-container label {
+        font-weight: 500;
+        color: #495057;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .form-container input,
+    .form-container textarea,
+    .form-container select {
+        width: 100%;
+        padding: 0.75rem;
+        margin-bottom: 1rem;
+        border: 1px solid #ced4da;
+        border-radius: 4px;
+        font-size: 1rem;
+        transition: border-color 0.3s ease, box-shadow 0.3s ease;
+    }
+
+    .form-container input:focus,
+    .form-container textarea:focus,
+    .form-container select:focus {
+        border-color: #6a11cb;
+        box-shadow: 0 0 5px rgba(106, 17, 203, 0.5);
+        outline: none;
+    }
+
+    .form-container button {
+        width: 100%;
+        padding: 0.75rem;
+        background-color: #6a11cb;
+        color: #fff;
+        border: none;
+        border-radius: 4px;
+        font-size: 1rem;
+        font-weight: 500;
+        cursor: pointer;
+        transition: background-color 0.3s ease;
+    }
+
+    .form-container button:hover {
+        background-color: #2575fc;
+    }
+
+    .form-container .form-text {
+        font-size: 0.875rem;
+        color: #6c757d;
+    }
+
+    .form-container .error-list {
+        list-style: none;
+        padding: 0;
+        margin-bottom: 1.5rem;
+    }
+
+    .form-container .error-list li {
+        color: #dc3545;
+        font-size: 0.9rem;
+        margin-bottom: 0.5rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="form-container">
+    <h1>Create or Edit Your CV</h1>
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+
+        <!-- Render Form Fields -->
+        {% for field in form %}
+            <div class="form-group">
+                <label for="{{ field.id_for_label }}">{{ field.label }}</label>
+                {{ field }}
+                {% if field.help_text %}
+                    <small class="form-text">{{ field.help_text }}</small>
+                {% endif %}
+                {% for error in field.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+        {% endfor %}
+
+        <!-- Display Form Errors -->
+        {% if form.errors %}
+            <ul class="error-list">
+                {% for field, errors in form.errors.items %}
+                    <li>{{ field|title }}: {{ errors|join:", " }}</li>
+                {% endfor %}
+            </ul>
+        {% endif %}
+
+        <!-- Submit Button -->
+        <button type="submit">Save CV</button>
+    </form>
+</div>
 {% endblock %}

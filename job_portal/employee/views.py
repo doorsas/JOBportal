@@ -32,7 +32,7 @@ def create_or_edit_cv(request):
     cv, created = CV.objects.get_or_create(employee=employee)
 
     if request.method == 'POST':
-        form = CVForm(request.POST, instance=cv)
+        form = CVForm(request.POST,request.FILES, instance=cv)
         if form.is_valid():
             form.save()
             return redirect('employer:employer_dashboard')  # Redirect to the employee dashboard or list
@@ -115,7 +115,7 @@ def employee_register(request):
                 user=user
             )
 
-            return redirect('employee_dashboard')  # Redirect to login or another page
+            return redirect('employee:home')  # Redirect to login or another page
     else:
         form = EmployeeRegistrationForm()
     return render(request, 'employee/employee_register.html', {'form': form})
@@ -169,7 +169,7 @@ def login_employee(request):
 def logout_employee(request):
     logout(request)
     messages.success(request, 'You have successfully logged out.')
-    return redirect('login_employee')
+    return redirect('employee:login_employee')
 
 
 @login_required

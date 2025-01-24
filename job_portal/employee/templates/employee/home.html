@@ -1,34 +1,75 @@
 {% extends 'base_employee.html' %}
 
-{% block title %}This is Employee page{% endblock %}
+{% block title %}Employee Dashboard - {{ username }}{% endblock %}
+
 {% block content %}
 <div class="d-flex justify-content-center align-items-center" style="min-height: 85vh;">
-    <div class="text-center">
-        <h1 class="mb-4">Welcome, {{ username }}</h1>
+    <div class="text-center bg-light p-5 rounded shadow">
+        <!-- Welcome Section -->
+        <h1 class="mb-4 display-4">Welcome, {{ username }}</h1>
 
-        <h2 class="mb-3">Your Details</h2>
-        <p><strong>Name:</strong> {{ employee.employee_name }}</p>
-        <p><strong>Email:</strong> {{ employee.email }}</p>
-        <p><strong>Phone:</strong> {{ employee.phone_number }}</p>
-
-        {% if cv %}
-            <h2 class="mt-4">CV Details</h2>
-            <p><strong>Education:</strong> {{ cv.education }}</p>
-            <p><strong>Experience:</strong> {{ cv.experience }}</p>
-            <p><strong>Skills:</strong> {{ cv.skills }}</p>
-            <p><strong>Created At:</strong> {{ cv.created_at }}</p>
-            <div class="mt-4">
-                <a href="{% url 'employee:cv_detail' employee.cv.id %}" class="btn btn-primary btn-sm me-2">View CV</a>
-                <a href="{% url 'employee:create_or_edit_cv' %}" class="btn btn-secondary btn-sm me-2">Edit CV</a>
-                <a href="{% url 'employee:employee_edit' employee.id %}" class="btn btn-warning btn-sm me-2">Edit Profile</a>
-                <a href="{% url 'employee:user_calendar' %}" class="btn btn-warning btn-sm me-2">User Calendar</a>
-                <a href="{% url 'employee:generate_pdf' %}" class="btn btn-secondary btn-sm">Agreement Example</a>
+        <!-- Employee Details Section -->
+        <div class="mb-5">
+            <h2 class="mb-4">Your Details</h2>
+            <div class="list-group">
+                <div class="list-group-item">
+                    <strong>Name:</strong> {{ employee.employee_name }}
+                </div>
+                <div class="list-group-item">
+                    <strong>Email:</strong> {{ employee.email }}
+                </div>
+                <div class="list-group-item">
+                    <strong>Phone:</strong> {{ employee.phone_number }}
+                </div>
             </div>
-        {% else %}
-            <p class="mt-4"><em>No CV available for this employee.</em></p>
+        </div>
+
+        <!-- CV Details Section -->
+        {% if cv %}
+            <div class="mb-5">
+                <h2 class="mb-4">CV Details</h2>
+                <div class="list-group">
+                    <div class="list-group-item">
+                        <strong>Education:</strong> {{ cv.education }}
+                    </div>
+                    <div class="list-group-item">
+                        <strong>Experience:</strong> {{ cv.experience }}
+                    </div>
+                    <div class="list-group-item">
+                        <strong>Skills:</strong> {{ cv.skills }}
+                    </div>
+                    <div class="list-group-item">
+                        <strong>Created At:</strong> {{ cv.created_at }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-grid gap-3 d-md-block">
+                <a href="{% url 'employee:cv_detail' employee.cv.id %}" class="btn btn-primary btn-lg me-2">View CV</a>
+                <a href="{% url 'employee:create_or_edit_cv' %}" class="btn btn-secondary btn-lg me-2">Edit CV</a>
+                <a href="{% url 'employee:employee_edit' employee.id %}" class="btn btn-warning btn-lg me-2">Edit Profile</a>
+                <a href="{% url 'employee:user_calendar' %}" class="btn btn-info btn-lg me-2">User Calendar</a>
+            </div>
+
+            <!-- Agreement Button (Moved Lower) -->
             <div class="mt-4">
-                <a href="{% url 'employee:create_or_edit_cv' %}" class="btn btn-secondary btn-sm me-2">Create CV</a>
-                <a href="{% url 'employee:user_calendar' %}" class="btn btn-warning btn-sm">User Calendar</a>
+                <a href="{% url 'employee:generate_pdf' %}" class="btn btn-success btn-lg">Agreement Example</a>
+
+            </div>
+
+        {% else %}
+            <!-- No CV Message -->
+            <div class="mb-5">
+                <p class="lead"><em>No CV available for this employer.</em></p>
+<!--                <a href="{% url 'employee:create_or_edit_cv' %}" class="btn btn-secondary btn-lg me-2">Create CV</a>-->
+
+            </div>
+
+            <!-- Action Buttons -->
+            <div class="d-grid gap-3 d-md-block">
+
+                <a href="{% url 'employee:user_calendar' %}" class="btn btn-info btn-lg">User Calendar</a>
             </div>
         {% endif %}
     </div>

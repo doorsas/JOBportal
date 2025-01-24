@@ -1,4 +1,4 @@
-{% extends 'base.html' %}
+{% extends 'base_employee.html' %}
 
 {% block extra_css %}
 <style>
@@ -70,24 +70,22 @@
             <div>Fri</div>
             <div>Sat</div>
         </div>
-        <div class="calendar-body">
-            {% for week in calendar_weeks %}
-                <div class="calendar-row">
-                    {% for day in week %}
-                        <div class="day {% if day.is_booked %}booked{% endif %}" data-date="{{ day.date }}">
-                            {{ day.date|date:"d" }}
-                            <br>
-                            {% if day.is_booked %}
-                                Booked
-                            {% else %}
-                                Free
-                            {% endif %}
-                        </div>
-                    {% endfor %}
+<div class="calendar-body">
+    {% for week in calendar_weeks %}
+        <div class="calendar-row">
+            {% for day in week %}
+                <div class="day {% if day.is_booked %}booked{% endif %}" data-date="{{ day.date }}">
+                    {{ day.date|date:"d" }}
+                    <br>
+                    {% if day.is_booked %}
+                        Booked
+                    {% else %}
+                        Free
+                    {% endif %}
                 </div>
             {% endfor %}
         </div>
-    </div>
+    {% endfor %}
 </div>
 
 {% endblock %}

@@ -1,14 +1,39 @@
 {% extends 'base_employer.html' %}
+
+{% block title %}Create Job Post - Employer Dashboard{% endblock %}
+
 {% block content %}
-    <div class="form-container">
-        <h1>Create JOB post</h1>
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit">Save JOB Post</button>
-        </form>
+<div class="d-flex justify-content-center align-items-center" style="min-height: 85vh;">
+    <div class="text-center bg-light p-5 rounded shadow" style="width: 90%; max-width: 800px;">
+        <!-- Create Job Post Heading -->
+        <h1 class="mb-4 display-4">Create Job Post</h1>
+
+        <!-- Job Post Form -->
+        <div class="form-container">
+            <form method="post" class="text-start">
+                {% csrf_token %}
+                <!-- Render Form Fields with Bootstrap Styling -->
+                {% for field in form %}
+                    <div class="mb-3">
+                        <label for="{{ field.id_for_label }}" class="form-label">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <small class="form-text text-muted">{{ field.help_text }}</small>
+                        {% endif %}
+                        {% if field.errors %}
+                            <div class="text-danger">
+                                {{ field.errors }}
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+                <!-- Submit Button -->
+                <div class="text-center mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">Save Job Post</button>
+                </div>
+            </form>
+        </div>
     </div>
-
+</div>
 {% endblock %}
-
 

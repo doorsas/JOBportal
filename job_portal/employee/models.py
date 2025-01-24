@@ -29,18 +29,35 @@ class Employee(models.Model):
 
 
 
+# class CV(models.Model):
+#     employee = models.OneToOneField(Employee, on_delete=models.CASCADE)  # Ensures one CV per employee
+#     education = models.TextField()
+#     experience = models.TextField()
+#     skills = models.TextField()
+#     created_at = models.DateTimeField(auto_now_add=True)
+#     # additional_documents
+#
+#     def __str__(self):
+#         return f"CV of {self.employee}"
 class CV(models.Model):
     employee = models.OneToOneField(Employee, on_delete=models.CASCADE)  # Ensures one CV per employee
     education = models.TextField()
     experience = models.TextField()
     skills = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
-    # additional_documents
-
-
+    name_surname = models.CharField(max_length=255, verbose_name="NAME, SURNAME")
+    date_and_place_of_birth = models.CharField(max_length=255, verbose_name="DATE AND PLACE OF BIRTH")
+    place_of_residence = models.CharField(max_length=255, verbose_name="PLACE OF RESIDENCE")
+    contacts = models.CharField(max_length=255, verbose_name="CONTACTS")
+    languages = models.TextField(verbose_name="LANGUAGES")
+    civil_status = models.CharField(max_length=255, verbose_name="CIVIL STATUS")
+    professional_experience = models.TextField(verbose_name="PROFESSIONAL EXPERIENCE")
+    other_relevant_information = models.TextField(verbose_name="OTHER RELEVANT INFORMATION")
+    characteristics = models.TextField(verbose_name="CHARACTERISTICS")
+    hobby = models.TextField(verbose_name="HOBBY")
+    attachment = models.FileField(upload_to='cv_attachments/', blank=True, null=True, verbose_name="Attachment")
     def __str__(self):
         return f"CV of {self.employee}"
-
 
 class CalendarDay(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)  # Link to the user
@@ -81,7 +98,7 @@ class CalendarDay(models.Model):
 def get_default_calendar_dates():
     # Generate the next 30 days as default calendar dates
     today = date.today()
-    return [(today + timedelta(days=i)).isoformat() for i in range(30)]  # Convert to ISO format strings
+    return [(today + timedelta(days=i)).isoformat() for i in range(60)]  # Convert to ISO format strings
 
 class Calendar(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='calendar')
