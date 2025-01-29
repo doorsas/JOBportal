@@ -77,6 +77,9 @@ TEMPLATES = [
     },
 ]
 
+
+
+
 WSGI_APPLICATION = 'job_portal.wsgi.application'
 
 

@@ -49,6 +49,7 @@ body {
     background-image: url("data:image/svg+xml;charset=utf8,%3Csvg viewBox='0 0 30 30' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath stroke='rgba(255, 255, 255, 0.8)' stroke-width='2' stroke-linecap='round' stroke-miterlimit='10' d='M4 7h22M4 15h22M4 23h22'/%3E%3C/svg%3E"); /* Custom toggler icon */
 }
 
+
 /* Dropdown Menu Styles */
 .navbar .dropdown-menu {
     background-color: rgba(106, 17, 203, 0.95); /* Semi-transparent dropdown background */
@@ -121,7 +122,11 @@ table tr:hover {
     background-color: #f1f1f1; /* Hover effect for rows */
     cursor: pointer;
 }
-
+/* In your CSS file */
+.table.table-hover.table-striped,
+.table.table-hover.table-striped tbody td {
+    color: #000;
+}
 /* Form Styles */
 form {
     max-width: 400px;

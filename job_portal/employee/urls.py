@@ -21,7 +21,8 @@ urlpatterns = [
     path('toggle-day-status/', views.toggle_day_status, name='toggle_day_status'),
     path('submit-cv/<int:job_id>/', views.submit_cv, name='submit_cv'),
     path('calendar/toggle-booking/<str:date_str>/', views.toggle_booking, name='toggle_booking'),
-    path('calendar/', views.user_calendar, name='user_calendar'),  # New route
+    path('calendar/', views.user_calendar, name='user_calendar'),
+
 
 
 

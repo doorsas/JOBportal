@@ -1,6 +1,8 @@
 from django.urls import path
 from . import views
-from .views import employer_list, employer_dashboard,create_job_post, employer_job_posts,jobpost_detail, employer_job_posts1
+from .views import employer_list, employer_dashboard,create_job_post,\
+    create_job_agreement_from_post,employer_job_posts,jobpost_detail,\
+    JobAgreementWaitingListView,employer_job_posts1,EmployerAgreementsView
 
 app_name = "employer"
 
@@ -14,8 +16,16 @@ urlpatterns = [
     path('employer/job-posts/<int:pk>/', jobpost_detail, name='jobpost_detail'),
     path('job-posts/', views.employer_job_posts1, name='employer_job_posts1'),
     path('cv/<int:cv_id>/', views.view_cv, name='view_cv'),
+    path('agreements/', EmployerAgreementsView.as_view(), name='employer_agreements'),
+    path('job-posts/<int:job_post_id>/create-agreement/', create_job_agreement_from_post, name='create_job_agreement'),
+    path('agreements/waiting-list/', JobAgreementWaitingListView.as_view(), name='job_agreement_waiting_list'),
+    path('agreements/<int:agreement_id>/', views.agreement_detail, name='agreement_detail'),
+
+
+
 
 ]
+
 
 
 

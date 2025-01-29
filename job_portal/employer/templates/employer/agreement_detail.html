@@ -1,0 +1,90 @@
+{% extends 'base_employer.html' %}
+
+{% block title %}Agreement with {{ agreement.employee.employee_name }}{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Custom CV Detail Styles */
+    .cv-detail-container {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 2rem;
+        background-color: #fff;
+        border-radius: 8px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    }
+
+    .cv-detail-container h1 {
+        text-align: center;
+        margin-bottom: 1.5rem;
+        font-size: 2rem;
+        color: #343a40;
+    }
+
+    .cv-detail-container p {
+        font-size: 1.1rem;
+        line-height: 1.6;
+        color: #495057;
+    }
+
+    .cv-detail-container strong {
+        color: #6a11cb; /* Purple color for headings */
+    }
+
+    .cv-detail-container .btn {
+        margin-top: 1.5rem;
+        padding: 0.75rem 1.5rem;
+        font-size: 1rem;
+        font-weight: 500;
+        border-radius: 4px;
+        transition: background-color 0.3s ease;
+    }
+
+    .cv-detail-container .btn-secondary {
+        background-color: #6a11cb;
+        border: none;
+        color: #fff;
+    }
+
+    .cv-detail-container .btn-secondary:hover {
+        background-color: #2575fc; /* Blue on hover */
+    }
+
+    /* Page Break Styles */
+    @media print {
+        .page-break {
+            page-break-after: always; /* Force a page break after each section */
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="cv-detail-container">
+    <h1>Agreement with {{ agreement.employee }}</h1>
+
+    <!-- Education Section -->
+    <div class="mb-4 page-break">
+        <p><strong>Employee :</strong></p>
+        <p>{{ agreement.employee }}</p>
+    </div>
+
+    <!-- Experience Section -->
+    <div class="mb-4 page-break">
+        <p><strong>Status:</strong></p>
+        <p>{{ agreement.status }}</p>
+    </div>
+
+    <!-- Skills Section -->
+    <div class="mb-4 page-break">
+        <p><strong>Created at:</strong></p>
+        <p>{{ agreement.created_at }}</p>
+    </div>
+
+
+    <!-- Professional Experience Section -->
+
+    <!-- Back Button -->
+    <a href="{% url 'employer:employer_agreements' %}" class="btn btn-secondary">Back to Agreements List</a>
+</div>
+{% endblock %}

@@ -21,24 +21,11 @@ class Employee(models.Model):
     national_id = models.IntegerField( blank=True, null=True, unique=True)
     receive_special_offers = models.BooleanField(default=False,)  # New field
     phone_number = models.CharField(max_length=20, blank=True, null=True, default="Unknown")  # New field
+    '''banko saskaita, gyvenamosios vietos adresas, artimo zmogaus kontaktai (tel nr) '''
 
     def __str__(self):
         return f"{self.employee_name} {self.employee_surname or ''}"
 
-
-
-
-
-# class CV(models.Model):
-#     employee = models.OneToOneField(Employee, on_delete=models.CASCADE)  # Ensures one CV per employee
-#     education = models.TextField()
-#     experience = models.TextField()
-#     skills = models.TextField()
-#     created_at = models.DateTimeField(auto_now_add=True)
-#     # additional_documents
-#
-#     def __str__(self):
-#         return f"CV of {self.employee}"
 class CV(models.Model):
     employee = models.OneToOneField(Employee, on_delete=models.CASCADE)  # Ensures one CV per employee
     education = models.TextField()
@@ -56,6 +43,7 @@ class CV(models.Model):
     characteristics = models.TextField(verbose_name="CHARACTERISTICS")
     hobby = models.TextField(verbose_name="HOBBY")
     attachment = models.FileField(upload_to='cv_attachments/', blank=True, null=True, verbose_name="Attachment")
+    """Dominancios darbo vietos """
     def __str__(self):
         return f"CV of {self.employee}"
 
@@ -71,24 +59,6 @@ class CalendarDay(models.Model):
     def __str__(self):
         status = "Free" if self.is_free else "Not Free"
         return f"{self.date} - {status}"
-
-"""class EmployerProfile(models.Model):
-    company_name = models.CharField(max_length=255, verbose_name="Įmonės pavadinimas")
-    contact_name = models.CharField(max_length=255, verbose_name="Kontaktinis asmuo")
-    email = models.EmailField(unique=True, verbose_name="El. paštas")
-    phone_number = models.CharField(max_length=20, verbose_name="Telefono numeris")
-    password = models.CharField(max_length=255, verbose_name="Slaptažodis")  # Slaptažodžiai paprastai šifruojami
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Sukurta")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="Atnaujinta")
-    is_active = models.BooleanField(default=False, verbose_name="Aktyvus")  # Aktyvuojama po el. pašto patvirtinimo
-
-    def __str__(self):
-        return self.company_name
-
-    class Meta:
-        verbose_name = "Darbdavio profilis"
-        verbose_name_plural = "Darbdavių profiliai"
-        ordering = ['-created_at']"""
 
 
 
@@ -108,3 +78,23 @@ class Booking(models.Model):
     calendar = models.ForeignKey(Calendar, on_delete=models.CASCADE, related_name='bookings')
     date = models.DateField()
     is_booked = models.BooleanField(default=False)
+
+
+"""class EmployerProfile(models.Model):
+    company_name = models.CharField(max_length=255, verbose_name="Įmonės pavadinimas")
+    contact_name = models.CharField(max_length=255, verbose_name="Kontaktinis asmuo")
+    email = models.EmailField(unique=True, verbose_name="El. paštas")
+    phone_number = models.CharField(max_length=20, verbose_name="Telefono numeris")
+    password = models.CharField(max_length=255, verbose_name="Slaptažodis")  # Slaptažodžiai paprastai šifruojami
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Sukurta")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Atnaujinta")
+    is_active = models.BooleanField(default=False, verbose_name="Aktyvus")  # Aktyvuojama po el. pašto patvirtinimo
+
+    def __str__(self):
+        return self.company_name
+
+    class Meta:
+        verbose_name = "Darbdavio profilis"
+        verbose_name_plural = "Darbdavių profiliai"
+        ordering = ['-created_at']"""
+

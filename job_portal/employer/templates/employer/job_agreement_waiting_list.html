@@ -1,0 +1,40 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2>Job Agreements Waiting List</h2>
+    
+    <table class="table table-hover table-striped">
+        <thead class="thead-dark">
+            <tr>
+                <th>Job Post</th>
+                <th>Employer</th>
+                <th>Offer Date</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for agreement in agreements %}
+            <tr>
+                <td>{{ agreement.job_post.title }}</td>
+                <td>{{ agreement.employer.company_name }}</td>
+                <td>{{ agreement.offer_date|date:"M d, Y" }}</td>
+                <td>
+                    <span class="badge badge-warning">{{ agreement.get_status_display }}</span>
+                </td>
+                <td>
+                    <a href="{% url 'view_job_agreement' agreement.id %}" class="btn btn-sm btn-info">
+                        View
+                    </a>
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="5" class="text-center">No agreements in the waiting list.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

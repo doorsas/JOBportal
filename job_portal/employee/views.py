@@ -5,24 +5,19 @@ from django.contrib.auth.models import User, Group
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.shortcuts import get_object_or_404, redirect,render
 from django.http import HttpResponse
 from reportlab.pdfgen import canvas
 from .models import CalendarDay
 from datetime import date, timedelta
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
 from datetime import datetime
-from employer.models import JobPost  # Import JobPost from employer app
-from django.shortcuts import render, get_object_or_404
+from employer.models import JobPost
+from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from .models import Calendar, Booking
 from django.views.decorators.csrf import csrf_exempt
-from django.utils.dateparse import parse_date
-# from dateutil.parser import parse as parse_date
-from django.utils.dateparse import parse_date as django_parse_date
-import json
-from calendar import Calendar as Cal
+# from django.utils.dateparse import parse_date
+from dateutil.parser import parse as parse_date
+
 
 
 
@@ -96,7 +91,7 @@ def employee_delete(request, pk):
     employee = get_object_or_404(Employee, pk=pk)
     if request.method == 'POST':
         employee.delete()
-        return redirect('home')  # Redirect back to list
+        return redirect('employee:home')  # Redirect back to list
 
 def employee_register(request):
     if request.method == 'POST':
@@ -273,10 +268,7 @@ def submit_cv(request, job_id):
 
 
 
-from django.http import HttpResponseBadRequest
 
-from dateutil.parser import parse as parse_date
-from django.utils.dateparse import parse_date as django_parse_date
 
 @csrf_exempt
 def toggle_booking(request, date_str):

@@ -8,7 +8,18 @@ from .models import Employer  # Import the Employer model
 from django.shortcuts import get_object_or_404, redirect,render
 from django.db.models import Prefetch
 from employee.models import CV
+from django.views.generic import ListView
+from employer.models import JobAgreement  # Update import based on your structure
+from datetime import date
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import ListView
+from django.contrib import messages
+from django.utils import timezone
 
+
+
+def today(request):
+    return {'today': date.today()}
 
 def employer_register(request):
     if request.method == 'POST':
@@ -116,3 +127,85 @@ def view_cv(request, cv_id):
     # Fetch the CV using the provided ID
     cv = get_object_or_404(CV, id=cv_id)
     return render(request, "employer/cv_detail.html", {"cv": cv})
+
+@login_required
+def agreement_detail(request, agreement_id):
+    # Fetch the CV using the provided ID
+    agreement = get_object_or_404(JobAgreement, id=agreement_id)
+    return render(request, "employer/agreement_detail.html", {"agreement": agreement})
+
+
+
+
+class EmployerAgreementsView(LoginRequiredMixin, ListView):
+    model = JobAgreement
+    template_name = 'employer/agreements_list.html'
+    context_object_name = 'agreements'
+    paginate_by = 10
+
+    def dispatch(self, request, *args, **kwargs):
+        # Check if user has employer profile
+        if not hasattr(request.user, 'employer'):
+            return render(
+                request,
+                "employer/error.html",
+                {
+                    "message": "You are an employee. You are not authorized to view this page."
+                },
+                status=403  # Forbidden status
+            )
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        # Filter agreements for the current employer
+        return JobAgreement.objects.filter(
+            employer=self.request.user.employer
+        ).select_related('employee').order_by('-start_date')
+
+
+
+def create_job_agreement_from_post(request, job_post_id):
+    job_post = get_object_or_404(JobPost, id=job_post_id)
+
+
+
+    # Ensure the request user is the employer who created the job post
+    if request.user != job_post.employer.user:
+        messages.error(request, "You are not authorized to perform this action.")
+        return redirect('employer:job_post_list')  # Redirect to job post list or another appropriate page
+
+    # Check if an agreement already exists for this job post
+    if JobAgreement.objects.filter(job_post=job_post).exists():
+        messages.warning(request, "An agreement already exists for this job post.")
+        return redirect('employer:job_post_list')
+
+    # Create a new JobAgreement
+    JobAgreement.objects.create(
+        employer=job_post.employer,
+        employee=None,  # No employee assigned yet (waiting list)
+        job_post=job_post,  # Link to the original job post
+        offer_date=timezone.now().date(),
+        status='pending',  # Set initial status
+    )
+
+    messages.success(request, "Job post moved to agreements waiting list.")
+    return redirect('employer:job_agreement_waiting_list')
+
+
+# def create_job_agreement_from_post(request, job_post_id):
+#     job_post = get_object_or_404(JobPost, id=job_post_id)
+#
+#     if request.user != job_post.employer.user:
+#         messages.error(request, "You are not authorized to perform this action.")
+#         return redirect('job_post_list')
+class JobAgreementWaitingListView(ListView):
+    model = JobAgreement
+    template_name = 'employer/job_agreement_waiting_list.html'
+    context_object_name = 'agreements'
+
+    def get_queryset(self):
+        # Filter agreements with no employee assigned (waiting list)
+        return JobAgreement.objects.filter(
+            employee=None,
+            status='pending'
+        ).select_related('job_post', 'employer')
