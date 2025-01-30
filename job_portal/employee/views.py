@@ -17,6 +17,7 @@ from .models import Calendar, Booking
 from django.views.decorators.csrf import csrf_exempt
 # from django.utils.dateparse import parse_date
 from dateutil.parser import parse as parse_date
+from .utils import generate_confirmation_token
 
 
 
@@ -93,27 +94,77 @@ def employee_delete(request, pk):
         employee.delete()
         return redirect('employee:home')  # Redirect back to list
 
+
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User, Group
+from django.core.mail import send_mail
+from django.conf import settings
+from .forms import EmployeeRegistrationForm
+from .models import Employee
+from .utils import generate_confirmation_token
+
+
 def employee_register(request):
     if request.method == 'POST':
         form = EmployeeRegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save()
+            # Create a new User object
+            user = User.objects.create_user(
+                username=form.cleaned_data['email'],  # Use email as the username
+                email=form.cleaned_data['email'],
+                password=form.cleaned_data['password1']  # Assuming the form has password fields
+            )
 
-            # Assign the user to the "Employer" group
+            # Assign the user to the "Employee" group
             employee_group, created = Group.objects.get_or_create(name='Employee')
             employee_group.user_set.add(user)
 
-            # Create an Employer instance
-            Employee.objects.create(
+            # Create an Employee instance
+            employee = Employee.objects.create(
                 employee_name=form.cleaned_data['employee_name'],
                 email=user.email,
-                user=user
+                user=user,
+                phone_number = form.cleaned_data['phone_number'],
+                is_email_verified=False  # Email is not verified yet
             )
 
-            return redirect('employee:home')  # Redirect to login or another page
+            # Generate a confirmation token
+            token = generate_confirmation_token(employee.email)
+
+            # Send confirmation email
+            confirmation_link = request.build_absolute_uri(
+                f"/confirm-email/{token}/"
+            )
+            send_mail(
+                'Confirm Your Email',
+                f'Please click the link below to confirm your email:\n\n{confirmation_link}',
+                settings.DEFAULT_FROM_EMAIL,
+                [employee.email],
+                fail_silently=False,
+            )
+
+            # Redirect to a "pending confirmation" page
+            return redirect('employee:registration_pending')
     else:
         form = EmployeeRegistrationForm()
+
     return render(request, 'employee/employee_register.html', {'form': form})
+
+def registration_failed(request):
+    return render(request, 'employee/registration_failed.html')
+
+
+def confirm_email(request, token):
+    email = confirm_token(token)
+    if email:
+        employee = Employee.objects.get(email=email)
+        employee.is_email_verified = True
+        employee.save()
+        messages.success(request, 'Your email has been confirmed!')
+        return redirect('employee:home')  # Redirect to the home page or login page
+    else:
+        messages.error(request, 'Invalid or expired confirmation link.')
+        return redirect('employee:registration_failed')
 
 @login_required
 def employee_list(request):
@@ -121,6 +172,8 @@ def employee_list(request):
     employees = Employee.objects.all()
     return render(request, 'employee/employee_list.html', {'employees': employees})
 
+def registration_pending(request):
+    return render(request, 'employee/registration_pending.html')
 
 @login_required
 def employee_dashboard(request):

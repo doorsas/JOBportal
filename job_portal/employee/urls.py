@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 
+
 app_name = 'employee'
 
 urlpatterns = [
@@ -22,8 +23,12 @@ urlpatterns = [
     path('submit-cv/<int:job_id>/', views.submit_cv, name='submit_cv'),
     path('calendar/toggle-booking/<str:date_str>/', views.toggle_booking, name='toggle_booking'),
     path('calendar/', views.user_calendar, name='user_calendar'),
-
-
-
-
+    path('confirm-email/<str:token>/', views.confirm_email, name='confirm_email'),
+    path('registration-pending/', views.registration_pending, name='registration_pending'),
+    path('registration-failed/', views.registration_failed, name='registration_failed'),
 ]
+
+
+
+
+

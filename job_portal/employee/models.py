@@ -22,6 +22,7 @@ class Employee(models.Model):
     receive_special_offers = models.BooleanField(default=False,)  # New field
     phone_number = models.CharField(max_length=20, blank=True, null=True, default="Unknown")  # New field
     '''banko saskaita, gyvenamosios vietos adresas, artimo zmogaus kontaktai (tel nr) '''
+    is_email_verified = models.BooleanField(default=False)
 
     def __str__(self):
         return f"{self.employee_name} {self.employee_surname or ''}"
