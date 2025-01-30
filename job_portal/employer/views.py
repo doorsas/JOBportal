@@ -118,9 +118,9 @@ def employer_job_posts1(request):
 def jobpost_detail(request, pk):
     print (pk)
     print ('bum')
-    cv = get_object_or_404(JobPost, pk=pk)
-    print (cv)
-    return render(request, 'employer/jobpost_detail.html', {'cv': cv})
+    job_post = get_object_or_404(JobPost, pk=pk)
+
+    return render(request, 'employer/jobpost_detail.html', {'job_post': job_post})
 
 @login_required
 def view_cv(request, cv_id):
