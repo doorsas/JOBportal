@@ -1,13 +1,13 @@
-{% extends 'base.html' %}
+{% extends 'base_employee.html' %}
 {% block content %}
 <div class="container mt-5">
-    <h1>CV of {{ cv.employee.employee_name }}</h1>
-    <p><strong>Education:</strong></p>
-    <p>{{ cv.education }}</p>
-    <p><strong>Experience:</strong></p>
-    <p>{{ cv.experience }}</p>
-    <p><strong>Skills:</strong></p>
-    <p>{{ cv.skills }}</p>
-    <a href="{% url 'employer_dashboard' %}" class="btn btn-secondary">Back to Employee List</a>
+    <h1>JOB post of {{ job_post.employer }}</h1>
+    <p><strong>Description:</strong></p>
+    <p>{{ job_post.description }}</p>
+    <p><strong>Location:</strong></p>
+    <p>{{ job_post.location }}</p>
+    <p><strong>Salary Range:</strong></p>
+    <p>{{ job_post.salary_range }}</p>
+    <a href="{% url 'employer:employer_dashboard' %}" class="btn btn-secondary">Back to Employee List</a>
 </div>
 {% endblock %}
