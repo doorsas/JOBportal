@@ -1,14 +1,10 @@
 from django.db import models
 from django.contrib.auth.models import User
-
+# from employer.models import JobPost
 from django.db import models
 from django.contrib.auth.models import User
 from datetime import date, timedelta
-
-
 from django.db import models
-
-# credit_card = EncryptedCharField(max_length=16)
 
 
 
@@ -23,6 +19,7 @@ class Employee(models.Model):
     phone_number = models.CharField(max_length=20, blank=True, null=True, default="Unknown")  # New field
     '''banko saskaita, gyvenamosios vietos adresas, artimo zmogaus kontaktai (tel nr) '''
     is_email_verified = models.BooleanField(default=False)
+    # credit_card = EncryptedCharField(max_length=16)
 
     def __str__(self):
         return f"{self.employee_name} {self.employee_surname or ''}"
@@ -44,9 +41,11 @@ class CV(models.Model):
     characteristics = models.TextField(verbose_name="CHARACTERISTICS")
     hobby = models.TextField(verbose_name="HOBBY")
     attachment = models.FileField(upload_to='cv_attachments/', blank=True, null=True, verbose_name="Attachment")
+
     """Dominancios darbo vietos """
     def __str__(self):
         return f"CV of {self.employee}"
+    # submitted_jobposts = models.ManyToManyField(JobPost, blank=True, related_name="subbmited_jobs")
 
 class CalendarDay(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)  # Link to the user

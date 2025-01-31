@@ -14,6 +14,9 @@ class Employer(models.Model):
     is_active = models.BooleanField(default=False, verbose_name="Aktyvus")  # Aktyvuojama po el. pašto patvirtinimo
     logo = models.ImageField(blank=True, null=True, upload_to='employer_logos/')
 
+    def __str__(self):
+        return self.company_name
+    
     class Meta:
         verbose_name = "Employer"
         verbose_name_plural = "Employers"
@@ -34,8 +37,7 @@ class Employer(models.Model):
             except Exception as e:
                 print(f"Error resizing logo: {e}")
 
-    def __str__(self):
-        return self.company_name
+
 
 
 '''
