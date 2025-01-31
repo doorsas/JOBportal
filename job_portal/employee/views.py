@@ -1,8 +1,6 @@
 from .forms import CVForm, EmployeeRegistrationForm, LoginForm,EmployeeEditForm
 from .models import CV, Employee
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.models import User, Group
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.http import HttpResponse
@@ -17,7 +15,12 @@ from .models import Calendar, Booking
 from django.views.decorators.csrf import csrf_exempt
 # from django.utils.dateparse import parse_date
 from dateutil.parser import parse as parse_date
+from django.shortcuts import render, redirect
+from django.contrib.auth.models import User, Group
+from django.core.mail import send_mail
+from django.conf import settings
 from .utils import generate_confirmation_token
+from django.views.decorators.csrf import csrf_protect
 
 
 
@@ -95,15 +98,9 @@ def employee_delete(request, pk):
         return redirect('employee:home')  # Redirect back to list
 
 
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User, Group
-from django.core.mail import send_mail
-from django.conf import settings
-from .forms import EmployeeRegistrationForm
-from .models import Employee
-from .utils import generate_confirmation_token
 
 
+@csrf_protect
 def employee_register(request):
     if request.method == 'POST':
         form = EmployeeRegistrationForm(request.POST)
@@ -139,7 +136,7 @@ def employee_register(request):
                 'Confirm Your Email',
                 f'Please click the link below to confirm your email:\n\n{confirmation_link}',
                 settings.DEFAULT_FROM_EMAIL,
-                [employee.email],
+                [form.cleaned_data['email']],
                 fail_silently=False,
             )
 

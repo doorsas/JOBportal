@@ -12,6 +12,18 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 
 from pathlib import Path
 import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_HOST = 'smtp.gmail.com'  # Example for Gmail
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = 'duomenuanalitikas@gmail.com'  # Your email address
+EMAIL_HOST_PASSWORD = os.getenv("GMAIL_K")  # Your email password
+print (EMAIL_HOST_PASSWORD)
+DEFAULT_FROM_EMAIL = 'duomenuanalitikas@gmail.com'
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -21,7 +33,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "default-secret-key")
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 print (SECRET_KEY)
 # SECRET_KEY = 'django-insecure-l&)p@#euf5qyo)ar2rw9if6bd7g3z44$k0gyat1b!l&8yhy2hg'
 
@@ -148,10 +160,3 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, 'static'),  # Custom app-level static files
 ]
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'  # Example for Gmail
-EMAIL_PORT = 587
-EMAIL_USE_TLS = True
-EMAIL_HOST_USER = 'duomenuanalitikas@gmail.com'  # Your email address
-EMAIL_HOST_PASSWORD = 'your-email-password'  # Your email password
-DEFAULT_FROM_EMAIL = 'duomenuanalitikas@gmail.com'
