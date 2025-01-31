@@ -9,8 +9,8 @@ class EmployerAdmin(admin.ModelAdmin):
 
 @admin.register(JobPost)
 class JobPostAdmin(admin.ModelAdmin):
-    list_display = ('employer', 'created_at')  # Customize fields for employer admin
-    search_fields = ('created_at', 'employer')
+    list_display = ('employer', 'created_at','title')  # Customize fields for employer admin
+    search_fields = ('created_at', 'employer','title')
 
 @admin.register(JobAgreement)
 class JobAgreementAdmin(admin.ModelAdmin):

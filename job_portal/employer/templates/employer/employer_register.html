@@ -80,7 +80,7 @@
 {% block content %}
 <div class="registration-form">
     <h1>Employer Registration</h1>
-    <form method="post">
+    <form method="post" enctype="multipart/form-data">
         {% csrf_token %}
 
         <!-- Render Form Fields -->

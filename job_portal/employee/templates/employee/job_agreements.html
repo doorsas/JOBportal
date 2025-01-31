@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Your Job Agreements</h1>
+
+{% if agreement_forms %}
+<table class="table">
+    <thead>
+        <tr>
+            <th>Job Title</th>
+            <th>Employer</th>
+            <th>Start Date</th>
+            <th>Current Status</th>
+
+            <th>Update Status</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for af in agreement_forms %}
+        <tr>
+            <td>{{ af.agreement.job_post.title }}</td>
+            <td>{{ af.agreement.employer.company_name }}</td>
+
+            <td>{{ af.agreement.start_date }}</td>
+            <td>{{ af.agreement.get_status_display }}</td>
+            <td>
+                <form method="post" class="form-inline">
+                    {% csrf_token %}
+                    <input type="hidden" name="agreement_id" value="{{ af.agreement.id }}">
+                    <div class="form-group mr-2">
+                        {{ af.form.status }}
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-sm">Update</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>No job agreements found.</p>
+{% endif %}
+
+{% endblock %}

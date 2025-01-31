@@ -1,4 +1,4 @@
-from .forms import JobPostForm, EmployerRegistrationForm
+from .forms import JobPostForm, EmployerRegistrationForm,JobAgreementStatusForm
 from .models import JobPost
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import UserCreationForm
@@ -15,33 +15,55 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView
 from django.contrib import messages
 from django.utils import timezone
+from django import forms
+from django.http import HttpResponseForbidden
 
 
 
 def today(request):
     return {'today': date.today()}
 
+# def employer_register(request):
+#     if request.method == 'POST':
+#         form = EmployerRegistrationForm(request.POST)
+#         if form.is_valid():
+#             user = form.save()
+#
+#             # Assign the user to the "Employer" group
+#             employer_group, created = Group.objects.get_or_create(name='Employer')
+#             employer_group.user_set.add(user)
+#
+#             # Create an Employer instance
+#             Employer.objects.create(
+#                 company_name=form.cleaned_data['company_name'],
+#                 email=user.email,
+#                 user=user
+#             )
+#
+#             return redirect('employer:create_job_post')  # Redirect to login or another page
+#     else:
+#         form = EmployerRegistrationForm()
+#     return render(request, 'employer/employer_register.html', {'form': form})
+
 def employer_register(request):
     if request.method == 'POST':
-        form = EmployerRegistrationForm(request.POST)
+        form = EmployerRegistrationForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save()
 
-            # Assign the user to the "Employer" group
+
+
             employer_group, created = Group.objects.get_or_create(name='Employer')
             employer_group.user_set.add(user)
 
-            # Create an Employer instance
-            Employer.objects.create(
-                company_name=form.cleaned_data['company_name'],
-                email=user.email,
-                user=user
-            )
 
-            return redirect('employer:create_job_post')  # Redirect to login or another page
+        return redirect('employer:employer_dashboard')  # Redirect to login page after successful registration
     else:
         form = EmployerRegistrationForm()
     return render(request, 'employer/employer_register.html', {'form': form})
+
+
+
 
 @login_required
 def create_job_post(request):
@@ -209,3 +231,49 @@ class JobAgreementWaitingListView(ListView):
             employee=None,
             status='pending'
         ).select_related('job_post', 'employer')
+
+
+
+@login_required
+def employer_job_agreements(request):
+    if not hasattr(request.user, 'employer'):
+        return HttpResponseForbidden("You are not an employer.")
+
+    employer = request.user.employer
+    agreements = JobAgreement.objects.filter(employer=employer)
+    return render(request, 'employer/job_agreements.html', {
+        'agreements': agreements
+    })
+
+@login_required
+def employee_job_agreements(request):
+    if not hasattr(request.user, 'employee'):
+        return HttpResponseForbidden("You are not an employee.")
+
+    employee = request.user.employee
+    agreements = JobAgreement.objects.filter(employee=employee)
+
+    if request.method == 'POST':
+        agreement_id = request.POST.get('agreement_id')
+        agreement = get_object_or_404(JobAgreement, id=agreement_id)
+
+        if agreement.employee != employee:
+            return HttpResponseForbidden()
+
+        form = JobAgreementStatusForm(request.POST, instance=agreement)
+        if form.is_valid():
+            updated_agreement = form.save(commit=False)
+            updated_agreement.modification_date = timezone.now().date()
+            updated_agreement.save()
+
+    # Prepare forms for all agreements
+    agreement_forms = []
+    for agreement in agreements:
+        agreement_forms.append({
+            'agreement': agreement,
+            'form': JobAgreementStatusForm(instance=agreement)
+        })
+
+    return render(request, 'employee/job_agreements.html', {
+        'agreement_forms': agreement_forms
+    })

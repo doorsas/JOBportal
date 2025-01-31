@@ -1,0 +1,18 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<h1>Job Agreements</h1>
+{% for agreement in agreements %}
+<div class="agreement">
+    <h3>{{ agreement.job_post.title }}</h3>
+    <p>Employee: {{ agreement.employee }}</p>
+    <p>Status: {{ agreement.get_status_display }}</p>
+    <p>Start Date: {{ agreement.start_date }}</p>
+    <p>End Date: {{ agreement.end_date|default:"-" }}</p>
+    <p>Last Modified: {{ agreement.modification_date|default:"-" }}</p>
+</div>
+<hr>
+{% empty %}
+<p>No job agreements found.</p>
+{% endfor %}
+{% endblock %}

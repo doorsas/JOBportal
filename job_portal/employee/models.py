@@ -81,21 +81,4 @@ class Booking(models.Model):
     is_booked = models.BooleanField(default=False)
 
 
-"""class EmployerProfile(models.Model):
-    company_name = models.CharField(max_length=255, verbose_name="Įmonės pavadinimas")
-    contact_name = models.CharField(max_length=255, verbose_name="Kontaktinis asmuo")
-    email = models.EmailField(unique=True, verbose_name="El. paštas")
-    phone_number = models.CharField(max_length=20, verbose_name="Telefono numeris")
-    password = models.CharField(max_length=255, verbose_name="Slaptažodis")  # Slaptažodžiai paprastai šifruojami
-    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Sukurta")
-    updated_at = models.DateTimeField(auto_now=True, verbose_name="Atnaujinta")
-    is_active = models.BooleanField(default=False, verbose_name="Aktyvus")  # Aktyvuojama po el. pašto patvirtinimo
-
-    def __str__(self):
-        return self.company_name
-
-    class Meta:
-        verbose_name = "Darbdavio profilis"
-        verbose_name_plural = "Darbdavių profiliai"
-        ordering = ['-created_at']"""
 

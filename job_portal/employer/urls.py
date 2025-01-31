@@ -20,6 +20,8 @@ urlpatterns = [
     path('job-posts/<int:job_post_id>/create-agreement/', create_job_agreement_from_post, name='create_job_agreement'),
     path('agreements/waiting-list/', JobAgreementWaitingListView.as_view(), name='job_agreement_waiting_list'),
     path('agreements/<int:agreement_id>/', views.agreement_detail, name='agreement_detail'),
+    path('employer/agreements/', views.employer_job_agreements, name='employer-agreements'),
+    path('employee/agreements/', views.employee_job_agreements, name='employee-agreements'),
 
 
 

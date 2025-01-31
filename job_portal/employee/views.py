@@ -134,7 +134,7 @@ def employee_register(request):
             )
             send_mail(
                 'Confirm Your Email',
-                f'Please click the link below to confirm your email:\n\n{confirmation_link}',
+                f'Please click the link below to confirm your email and registration to Drekar:\n\n{confirmation_link}',
                 settings.DEFAULT_FROM_EMAIL,
                 [form.cleaned_data['email']],
                 fail_silently=False,

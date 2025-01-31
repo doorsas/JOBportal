@@ -26,6 +26,7 @@ urlpatterns = [
     path('confirm-email/<str:token>/', views.confirm_email, name='confirm_email'),
     path('registration-pending/', views.registration_pending, name='registration_pending'),
     path('registration-failed/', views.registration_failed, name='registration_failed'),
+
 ]
 
 

@@ -1,20 +1,47 @@
 from django.db import models
 from django.contrib.auth.models import User
 from employee.models import CV, Employee # Import CV model from the employee app
-
+from PIL import Image
 
 class Employer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)  # Link to User
-    company_name = models.CharField(max_length=255)
-    email = models.EmailField()
+    company_name = models.CharField(max_length=255, verbose_name="Įmonės pavadinimas")
+    contact_name = models.CharField(max_length=255, verbose_name="Kontaktinis asmuo")
+    email = models.EmailField(unique=True, verbose_name="El. paštas")
+    phone_number = models.CharField(max_length=20, verbose_name="Telefono numeris")
+    created_at = models.DateTimeField(auto_now_add=True, verbose_name="Sukurta")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Atnaujinta")
+    is_active = models.BooleanField(default=False, verbose_name="Aktyvus")  # Aktyvuojama po el. pašto patvirtinimo
+    logo = models.ImageField(blank=True, null=True, upload_to='employer_logos/')
+
+    class Meta:
+        verbose_name = "Employer"
+        verbose_name_plural = "Employers"
+        ordering = ['-created_at']
+
+    def save(self, *args, **kwargs):
+        # Call the parent save method
+        super().save(*args, **kwargs)
+
+        # Resize the logo if it exists
+        if self.logo:
+            logo_path = self.logo.path
+            try:
+                img = Image.open(logo_path)
+                # Resize the image to a fixed size (e.g., 200x200)
+                img = img.resize((200, 200), Image.ANTIALIAS)
+                img.save(logo_path)  # Save the resized image back to the same path
+            except Exception as e:
+                print(f"Error resizing logo: {e}")
 
     def __str__(self):
         return self.company_name
+
+
 '''
 Įmonės registracija:
 Logo (neprivaloma)
 Trumpas veiklos aprašymas
-Pavadinimas
 Registro numeris
 PVM numeris
 Buveinės adresas
@@ -25,6 +52,9 @@ Telefonas
 El paštas
 Sąskaitų siuntimo el paštas + apskaitos telefonas
 '''
+
+
+
 
 class JobPost(models.Model):
     employer = models.ForeignKey(Employer, on_delete=models.CASCADE)
