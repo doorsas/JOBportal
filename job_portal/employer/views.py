@@ -17,6 +17,10 @@ from django.contrib import messages
 from django.utils import timezone
 from django import forms
 from django.http import HttpResponseForbidden
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from employer.models import JobPost
+from employee.models import JobApplication
 
 
 
@@ -119,22 +123,29 @@ def employer_job_posts(request, employer_id):
     })
 
 
+
+
 @login_required
 def employer_job_posts1(request):
     # Ensure the logged-in user is an employer
     try:
         employer = request.user.employer
-    except Employer.DoesNotExist:
-        return render(request, "employer/error.html", {"message": "You are Employee. You are not authorized to view this page."})
+    except AttributeError:
+        return render(request, "employer/error.html", {"message": "You are not authorized to view this page."})
 
     # Fetch all job posts for this employer
-    job_posts = JobPost.objects.filter(employer=employer).prefetch_related('submitted_cvs')
+    job_posts = JobPost.objects.filter(employer=employer).prefetch_related('applications')
+
+    # Fetch all applications related to the employer's job posts
+    job_applications = JobApplication.objects.filter(job_post__in=job_posts).select_related('employee', 'cv')
 
     context = {
         "employer": employer,
         "job_posts": job_posts,
+        "job_applications": job_applications,
     }
     return render(request, "employer/job_posts.html", context)
+
 
 @login_required
 def jobpost_detail(request, pk):

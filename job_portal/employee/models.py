@@ -1,10 +1,12 @@
 from django.db import models
 from django.contrib.auth.models import User
-# from employer.models import JobPost
-from django.db import models
+
 from django.contrib.auth.models import User
 from datetime import date, timedelta
 from django.db import models
+from django.contrib.auth import get_user_model
+
+User = get_user_model()
 
 
 
@@ -41,11 +43,35 @@ class CV(models.Model):
     characteristics = models.TextField(verbose_name="CHARACTERISTICS")
     hobby = models.TextField(verbose_name="HOBBY")
     attachment = models.FileField(upload_to='cv_attachments/', blank=True, null=True, verbose_name="Attachment")
+    applications = models.ManyToManyField("employer.JobPost", through="JobApplication", blank=True)
 
     """Dominancios darbo vietos """
     def __str__(self):
         return f"CV of {self.employee}"
     # submitted_jobposts = models.ManyToManyField(JobPost, blank=True, related_name="subbmited_jobs")
+
+class JobApplication(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('reviewed', 'Reviewed'),
+        ('accepted', 'Accepted'),
+        ('rejected', 'Rejected'),
+    ]
+
+    employee = models.ForeignKey("employee.Employee", on_delete=models.CASCADE, related_name="applications")
+    job_post = models.ForeignKey("employer.JobPost", on_delete=models.CASCADE, related_name="applications")  # Lazy reference
+    cv = models.ForeignKey("employee.CV", on_delete=models.CASCADE)
+    applied_at = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+
+    class Meta:
+        unique_together = ('employee', 'job_post')
+
+    def __str__(self):
+        return f"{self.employee} applied for {self.job_post.title}"
+
+
+
 
 class CalendarDay(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)  # Link to the user
@@ -74,6 +100,8 @@ class Booking(models.Model):
     calendar = models.ForeignKey(Calendar, on_delete=models.CASCADE, related_name='bookings')
     date = models.DateField()
     is_booked = models.BooleanField(default=False)
+
+
 
 
 

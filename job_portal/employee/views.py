@@ -1,5 +1,5 @@
 from .forms import CVForm, EmployeeRegistrationForm, LoginForm,EmployeeEditForm
-from .models import CV, Employee
+from .models import CV, Employee, JobApplication
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -8,7 +8,6 @@ from reportlab.pdfgen import canvas
 from .models import CalendarDay
 from datetime import date, timedelta
 from datetime import datetime
-from employer.models import JobPost
 from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
 from .models import Calendar, Booking
@@ -21,6 +20,7 @@ from django.core.mail import send_mail
 from django.conf import settings
 from .utils import generate_confirmation_token
 from django.views.decorators.csrf import csrf_protect
+from employer.models import JobPost
 
 
 
@@ -296,25 +296,34 @@ def toggle_day_status(request):
 
 
 @login_required
+
+
 def submit_cv(request, job_id):
-    # Get the job post
     job = get_object_or_404(JobPost, id=job_id)
 
-    # Ensure the user is an employee and has a CV
+    if not request.user.is_authenticated:
+        messages.error(request, "You must be logged in to apply for a job.")
+        return redirect('login')
+
     try:
         employee = request.user.employee
         cv = employee.cv
-    except (Employee.DoesNotExist, CV.DoesNotExist):
-        messages.error(request, "You must have a CV to apply for a job.")
+    except Employee.DoesNotExist:
+        messages.error(request, "You must be an employee to apply for a job.")
         return redirect('employer:employer_dashboard')
+    except CV.DoesNotExist:
+        messages.error(request, "You must have a CV to apply for a job.")
+        return redirect('employee:create_cv')
 
-    # Add the CV to the job post's submissions
-    job.submitted_cvs.add(cv)
-
-    # Add a success message
-    messages.success(request, f"You have successfully applied for the job: {job.title}.")
+    # Check if the employee has already applied for this job
+    if JobApplication.objects.filter(job_post=job, employee=employee).exists():
+        messages.warning(request, "You have already applied for this job.")
+    else:
+        JobApplication.objects.create(job_post=job, employee=employee, cv=cv)
+        messages.success(request, f"You have successfully applied for {job.title}.")
 
     return redirect('employer:employer_dashboard')
+
 
 
 

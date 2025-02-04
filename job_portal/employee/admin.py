@@ -1,9 +1,9 @@
 from django.contrib import admin
-from .models import Employee,CV
+from .models import Employee,CV,JobApplication
 
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
-    list_display = ('employee_name', 'email')  # Customize fields for employee admin
+    list_display = ('employee_name','user', 'email')  # Customize fields for employee admin
     search_fields = ('employee_name', 'email')
     list_filter = ('email',)  # Add filtering options
 
@@ -13,3 +13,7 @@ class CVAdmin(admin.ModelAdmin):
     search_fields = ('employee__employee_name', 'name_surname')
     list_filter = ('civil_status',)
 
+@admin.register(JobApplication)
+class JobApplicationAdmin(admin.ModelAdmin):
+    list_display = ('employee', 'status')  # Customize fields for employer admin
+    search_fields = ('created_at', 'status')

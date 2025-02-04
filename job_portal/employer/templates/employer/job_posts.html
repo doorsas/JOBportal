@@ -34,42 +34,46 @@
                                     </div>
                                 </div>
 
-                                <!-- Submitted CVs Section -->
-                                <h4 class="h6 mt-4 mb-3 text-secondary">Submitted CVs</h4>
-                                {% if job.submitted_cvs.all %}
+                                <!-- Submitted Applications Section -->
+                                <h4 class="h6 mt-4 mb-3 text-secondary">Submitted Applications</h4>
+                                {% with job_applications|dictsort:"id" as job_apps %}
+                                {% if job_apps %}
                                 <div class="list-group">
-                                    {% for cv in job.submitted_cvs.all %}
-                                    <div class="list-group-item list-group-item-action">
-                                        <div class="d-flex justify-content-between align-items-center">
-                                            <div class="d-flex align-items-center">
-                                                <div class="avatar me-3">
-                                                    <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
-                                                          style="width: 40px; height: 40px;">
-                                                        {{ cv.employee.employee_name|first|upper }}
-                                                    </span>
+                                    {% for application in job_apps %}
+                                        {% if application.job_post == job %}
+                                        <div class="list-group-item list-group-item-action">
+                                            <div class="d-flex justify-content-between align-items-center">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="avatar me-3">
+                                                        <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                                              style="width: 40px; height: 40px;">
+                                                            {{ application.employee.employee_name|first|upper }}
+                                                        </span>
+                                                    </div>
+                                                    <div>
+                                                        <h6 class="mb-1">{{ application.employee.employee_name }} {{ application.employee.employee_surname }}</h6>
+                                                        <small class="text-muted">{{ application.employee.email }}</small>
+                                                    </div>
                                                 </div>
                                                 <div>
-                                                    <h6 class="mb-1">{{ cv.employee.employee_name }} {{ cv.employee.employee_surname }}</h6>
-                                                    <small class="text-muted">{{ cv.employee.email }}</small>
+                                                    <a href="{% url 'employee:cv_detail' application.cv.id %}"
+                                                       class="btn btn-outline-primary btn-sm rounded-pill">
+                                                       <i class="fas fa-eye me-1"></i>View CV
+                                                    </a>
+                                                    <span class="badge bg-info ms-2">New</span>
                                                 </div>
                                             </div>
-                                            <div>
-                                                <a href="{% url 'employee:cv_detail' cv.id %}" 
-                                                   class="btn btn-outline-primary btn-sm rounded-pill">
-                                                   <i class="fas fa-eye me-1"></i>View CV
-                                                </a>
-                                                <span class="badge bg-info ms-2">New</span>
-                                            </div>
                                         </div>
-                                    </div>
+                                        {% endif %}
                                     {% endfor %}
                                 </div>
                                 {% else %}
                                 <div class="alert alert-warning mb-0">
                                     <i class="fas fa-exclamation-circle me-2"></i>
-                                    No CVs submitted yet.
+                                    No applications submitted yet.
                                 </div>
                                 {% endif %}
+                                {% endwith %}
                             </div>
                         </div>
                     </div>

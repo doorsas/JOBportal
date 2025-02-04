@@ -16,3 +16,7 @@ class JobPostAdmin(admin.ModelAdmin):
 class JobAgreementAdmin(admin.ModelAdmin):
     list_display = ('employer', 'created_at')  # Customize fields for employer admin
     search_fields = ('created_at', 'employer')
+
+
+
+

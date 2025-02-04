@@ -115,10 +115,11 @@ class JobPost(models.Model):
     location = models.CharField(max_length=255,choices=EUROPEAN_COUNTRIES)
     salary_range = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
-    submitted_cvs = models.ManyToManyField(CV, blank=True, related_name="applied_jobs")  # Reference CV
+
 
     def __str__(self):
         return self.title
+
 
 
 class JobAgreement(models.Model):
