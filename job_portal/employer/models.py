@@ -59,10 +59,60 @@ Sąskaitų siuntimo el paštas + apskaitos telefonas
 
 
 class JobPost(models.Model):
+
+    EUROPEAN_COUNTRIES = [
+    ('AL', 'Albania'),
+    ('AD', 'Andorra'),
+    ('AT', 'Austria'),
+    ('BY', 'Belarus'),
+    ('BE', 'Belgium'),
+    ('BA', 'Bosnia and Herzegovina'),
+    ('BG', 'Bulgaria'),
+    ('HR', 'Croatia'),
+    ('CY', 'Cyprus'),
+    ('CZ', 'Czech Republic'),
+    ('DK', 'Denmark'),
+    ('EE', 'Estonia'),
+    ('FI', 'Finland'),
+    ('FR', 'France'),
+    ('DE', 'Germany'),
+    ('GR', 'Greece'),
+    ('HU', 'Hungary'),
+    ('IS', 'Iceland'),
+    ('IE', 'Ireland'),
+    ('IT', 'Italy'),
+    ('XK', 'Kosovo'),
+    ('LV', 'Latvia'),
+    ('LI', 'Liechtenstein'),
+    ('LT', 'Lithuania'),
+    ('LU', 'Luxembourg'),
+    ('MT', 'Malta'),
+    ('MD', 'Moldova'),
+    ('MC', 'Monaco'),
+    ('ME', 'Montenegro'),
+    ('NL', 'Netherlands'),
+    ('MK', 'North Macedonia'),
+    ('NO', 'Norway'),
+    ('PL', 'Poland'),
+    ('PT', 'Portugal'),
+    ('RO', 'Romania'),
+    ('RU', 'Russia'),
+    ('SM', 'San Marino'),
+    ('RS', 'Serbia'),
+    ('SK', 'Slovakia'),
+    ('SI', 'Slovenia'),
+    ('ES', 'Spain'),
+    ('SE', 'Sweden'),
+    ('CH', 'Switzerland'),
+    ('UA', 'Ukraine'),
+    ('GB', 'United Kingdom'),
+    ('VA', 'Vatican City'),
+]
+
     employer = models.ForeignKey(Employer, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField()
-    location = models.CharField(max_length=255)
+    location = models.CharField(max_length=255,choices=EUROPEAN_COUNTRIES)
     salary_range = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
     submitted_cvs = models.ManyToManyField(CV, blank=True, related_name="applied_jobs")  # Reference CV
@@ -92,7 +142,7 @@ class JobAgreement(models.Model):
         Employee,
         on_delete=models.PROTECT,
         related_name='agreements',
-        null = True,  # Add this
+        null = True,
         blank = True
     )
 

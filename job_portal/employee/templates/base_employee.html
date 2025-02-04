@@ -1,4 +1,8 @@
+
 {% load static %}
+{% load widget_tweaks %}
+{% load custom_filters %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -38,14 +42,15 @@
                         <a class="nav-link text-light fs-5" href="{% url 'employee:create_or_edit_cv' %}">Create or Edit CV</a>
                     </li>
                     <li class="nav-item mx-2">
+                        <a class="nav-link text-light fs-5" href="{% url 'employer:employee-agreements' %}">Job Agreements</a>
+                    </li>
+                    <li class="nav-item mx-2">
                         <a class="btn btn-outline-light btn-sm fw-bold px-3" href="{% url 'employee:home' %}">My Info</a>
                     </li>
                     <li class="nav-item mx-2">
                         <a class="btn btn-outline-light btn-sm fw-bold px-3" href="{% url 'employee:logout' %}">Log Out</a>
                     </li>
-                    <li class="nav-item">
-                    <a class="nav-link" href="{% url 'employer:employer_agreements' %}">Job Agreements</a>
-                    </li>
+
 
 
                 </ul>

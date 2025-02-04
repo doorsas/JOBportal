@@ -85,7 +85,7 @@ def employee_edit(request, pk):
         form = EmployeeEditForm(request.POST, instance=employee)
         if form.is_valid():
             form.save()
-            return redirect('employer_dashboard')  # Redirect back to list
+            return redirect('employee:home')  # Redirect back to list
     else:
         form = EmployeeEditForm(instance=employee)
     return render(request, 'employee/employee_edit.html', {'form': form})

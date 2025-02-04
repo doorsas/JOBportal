@@ -61,10 +61,6 @@ class CalendarDay(models.Model):
         return f"{self.date} - {status}"
 
 
-
-
-
-# Models
 def get_default_calendar_dates():
     # Generate the next 30 days as default calendar dates
     today = date.today()

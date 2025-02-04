@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'employer',
     'employee',
     'eor',
+    'widget_tweaks',
 ]
 
 LOGIN_URL = '/'  # URL adresas prisijungimo puslapiui
@@ -72,10 +73,13 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                'employee.context_processors.base_template',
             ],
         },
     },
 ]
+
+
 
 
 

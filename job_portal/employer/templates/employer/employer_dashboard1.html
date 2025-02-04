@@ -1,73 +1,146 @@
-{% extends 'base_employee.html' %}
+{% extends base_template %}
 
 {% block title %}Employer Dashboard{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-center align-items-center" style="min-height: 85vh;">
-    <div class="text-center bg-light p-5 rounded shadow" style="width: 90%; max-width: 1200px;">
-        <!-- Messages -->
-
-
+<div class="container-fluid py-5">
+    <div class="container-lg">
         <!-- Dashboard Heading -->
-        <h1 class="mb-4 display-4">Employer Dashboard</h1>
+        <h1 class="mb-5 text-center display-4 fw-bold text-primary">Employer Dashboard</h1>
 
         <!-- Employer Cards -->
         {% for employer in employers %}
-            <div class="card mb-4 shadow-sm">
-                <div class="card-header bg-primary text-white">
-                    <h2 class="h5 mb-0">{{ employer.company_name }}</h2>
+            <div class="card employer-card mb-5 border-0 shadow-lg">
+                <div class="card-header bg-primary text-white py-3 d-flex justify-content-between align-items-center">
+                    <div class="d-flex align-items-center">
+                        {% if employer.logo %}
+                        <div class="employer-logo me-3">
+                            <img src="{{ employer.logo.url }}" alt="{{ employer.company_name }} Logo"
+                                 class="img-fluid rounded-circle" style="width: 60px; height: 60px; object-fit: cover;">
+                        </div>
+                        {% endif %}
+                        <div>
+                            <h2 class="h4 mb-0">{{ employer.company_name }}</h2>
+                            <p class="mb-0 small">{{ employer.email }}</p>
+                        </div>
+                    </div>
+                    <span class="badge bg-light text-primary fs-6">Hiring Now</span>
                 </div>
-                <div class="card-body">
-                    <p><strong>Email:</strong> {{ employer.email }}</p>
 
+                <div class="card-body p-4">
                     <!-- Job Posts Section -->
-                    <h3 class="h6 mt-3">Job Posts</h3>
+                    <h3 class="h5 mb-4 text-secondary">Open Positions</h3>
+
                     {% if employer.jobpost_set.all %}
-                        <ul class="list-group">
+                        <div class="row g-4">
                             {% for job in employer.jobpost_set.all %}
-                                <li class="list-group-item">
-                                    <h5 class="mb-1">{{ job.title }}</h5>
-                                    <small class="text-muted">Posted on: {{ job.created_at|date:"M d, Y H:i" }}</small>
-                                    <p class="mb-1">{{ job.description }}</p>
-                                    <p class="mb-0">
-                                        <strong>Location:</strong> {{ job.location }} <br>
-                                        <strong>Salary:</strong> {{ job.salary_range }}
-                                    </p>
-
-                                    <!-- Submit CV Button (Visible to Employees) -->
-                                    {% if request.user.is_authenticated and request.user.employee %}
-                                        <form action="{% url 'employee:submit_cv' job.id %}" method="post" class="mt-2">
-                                            {% csrf_token %}
-                                            <button type="submit" class="btn btn-success btn-sm">Submit CV</button>
-                                        </form>
-                                    {% endif %}
-
-                                    <!-- Submitted CVs Section (Visible to Employers) -->
-                                    {% if request.user.is_authenticated and request.user.employer %}
-                                        <h5 class="mt-3">Submitted CVs</h5>
-                                        {% if job.submitted_cvs.all %}
-                                            <ul class="list-group">
-                                                {% for cv in job.submitted_cvs.all %}
-                                                    <li class="list-group-item">
-                                                        <strong>Employee:</strong> {{ cv.employee.employee_name }} {{ cv.employee.employee_surname }}<br>
-                                                        <strong>Email:</strong> {{ cv.employee.email }}<br>
-                                                        <a href="{% url 'employer:view_cv' cv.id %}" class="btn btn-link btn-sm">View CV</a>
-                                                    </li>
-                                                {% endfor %}
-                                            </ul>
-                                        {% else %}
-                                            <p class="text-muted">No CVs submitted yet.</p>
-                                        {% endif %}
-                                    {% endif %}
-                                </li>
+                            <div class="col-12">
+                                <div class="job-card card border-0 shadow-sm h-100 hover-shadow">
+                                    <div class="card-body p-4">
+                                        <div class="d-flex justify-content-between align-items-start">
+                                            <div class="w-75">
+                                                <h4 class="h5 mb-2 fw-bold text-dark">{{ job.title }}</h4>
+                                                <div class="d-flex flex-wrap gap-2 mb-3">
+                                                    <span class="badge bg-primary-soft text-primary">
+                                                        <i class="fas fa-map-marker-alt me-1"></i>{{ job.location }}
+                                                    </span>
+                                                    <span class="badge bg-success-soft text-success">
+                                                        <i class="fas fa-wallet me-1"></i>{{ job.salary_range }}
+                                                    </span>
+                                                    <span class="badge bg-info-soft text-info">
+                                                        <i class="far fa-clock me-1"></i>{{ job.created_at|timesince }} ago
+                                                    </span>
+                                                </div>
+                                                <p class="text-muted mb-0">{{ job.description|truncatewords:30 }}</p>
+                                            </div>
+                                            <!-- Submit CV Button -->
+                                            {% if request.user.is_authenticated and request.user.employee %}
+                                            <div class="d-flex flex-column align-items-end">
+                                                <form action="{% url 'employee:submit_cv' job.id %}" method="post">
+                                                    {% csrf_token %}
+                                                    <button type="submit" class="btn btn-primary btn-lg rounded-pill px-4">
+                                                        <i class="far fa-paper-plane me-2"></i>Apply Now
+                                                    </button>
+                                                </form>
+                                                <small class="text-muted mt-2">Expires in 5 days</small>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
                             {% endfor %}
-                        </ul>
+                        </div>
                     {% else %}
-                        <p class="text-muted">No job posts available.</p>
+                        <div class="alert alert-info mb-0">No current job openings</div>
+                    {% endif %}
+
+                    <!-- Submitted CVs Section (For Employers) -->
+                    {% if request.user.is_authenticated and request.user.employer %}
+                    <div class="mt-5">
+                        <h4 class="h5 mb-4 text-secondary">Applications Received</h4>
+                        {% if job.submitted_cvs.all %}
+                            <div class="list-group">
+                                {% for cv in job.submitted_cvs.all %}
+                                <div class="list-group-item list-group-item-action">
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar me-3">
+                                                <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
+                                                      style="width: 40px; height: 40px;">
+                                                    {{ cv.employee.employee_name|first|upper }}
+                                                </span>
+                                            </div>
+                                            <div>
+                                                <h6 class="mb-1">{{ cv.employee.employee_name }} {{ cv.employee.employee_surname }}</h6>
+                                                <small class="text-muted">{{ cv.employee.email }}</small>
+                                            </div>
+                                        </div>
+                                        <div>
+                                            <a href="{% url 'employer:view_cv' cv.id %}"
+                                               class="btn btn-outline-primary btn-sm rounded-pill">
+                                               <i class="far fa-eye me-1"></i>View CV
+                                            </a>
+                                            <span class="badge bg-info ms-2">New</span>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning">No applications received yet</div>
+                        {% endif %}
+                    </div>
                     {% endif %}
                 </div>
             </div>
         {% endfor %}
     </div>
 </div>
+
+<style>
+    .employer-card {
+        border-radius: 1rem;
+        overflow: hidden;
+    }
+    .job-card {
+        transition: transform 0.2s ease-in-out;
+        border-radius: 0.75rem;
+    }
+    .job-card:hover {
+        transform: translateY(-3px);
+    }
+    .bg-primary-soft {
+        background-color: rgba(13, 110, 253, 0.1);
+    }
+    .bg-success-soft {
+        background-color: rgba(25, 135, 84, 0.1);
+    }
+    .bg-info-soft {
+        background-color: rgba(13, 202, 240, 0.1);
+    }
+    .avatar {
+        min-width: 40px;
+    }
+</style>
 {% endblock %}

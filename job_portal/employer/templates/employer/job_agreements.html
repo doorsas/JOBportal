@@ -1,18 +1,97 @@
-{% extends 'base.html' %}
+{% extends base_template %}
 
 {% block content %}
-<h1>Job Agreements</h1>
-{% for agreement in agreements %}
-<div class="agreement">
-    <h3>{{ agreement.job_post.title }}</h3>
-    <p>Employee: {{ agreement.employee }}</p>
-    <p>Status: {{ agreement.get_status_display }}</p>
-    <p>Start Date: {{ agreement.start_date }}</p>
-    <p>End Date: {{ agreement.end_date|default:"-" }}</p>
-    <p>Last Modified: {{ agreement.modification_date|default:"-" }}</p>
+<div class="container-fluid py-5">
+    <div class="container-lg">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-primary text-white py-3">
+                <h1 class="h3 mb-0">Job Agreements</h1>
+                <p class="mb-0 small">Manage your employment contracts and agreements</p>
+            </div>
+
+            <div class="card-body p-4">
+                {% if agreements %}
+                <div class="row g-4">
+                    {% for agreement in agreements %}
+                    <div class="col-12">
+                        <div class="agreement-card card border-0 shadow-sm h-100 hover-shadow">
+                            <div class="card-body p-4">
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <div class="w-75">
+                                        <h3 class="h5 mb-2 fw-bold text-dark">
+                                            {{ agreement.job_post.title }}
+                                        </h3>
+                                        <div class="d-flex flex-wrap gap-2 mb-3">
+                                            <span class="badge bg-primary-soft text-primary">
+                                                <i class="fas fa-user me-1"></i>
+                                                {{ agreement.employee }}
+                                            </span>
+                                            <span class="badge bg-info-soft text-info">
+                                                <i class="fas fa-file-contract me-1"></i>
+                                                {{ agreement.get_status_display }}
+                                            </span>
+                                            <span class="badge bg-success-soft text-success">
+                                                <i class="fas fa-calendar-start me-1"></i>
+                                                {{ agreement.start_date }}
+                                            </span>
+                                            {% if agreement.end_date %}
+                                            <span class="badge bg-warning-soft text-warning">
+                                                <i class="fas fa-calendar-end me-1"></i>
+                                                {{ agreement.end_date }}
+                                            </span>
+                                            {% endif %}
+                                        </div>
+                                        <div class="text-muted small">
+                                            <i class="fas fa-clock me-1"></i>
+                                            Last Modified: {{ agreement.modification_date|default:"-" }}
+                                        </div>
+                                    </div>
+                                    <div class="d-flex flex-column align-items-end">
+
+                                        <a href="{% url 'employer:agreement_detail' agreement.id %}"  class="btn btn-primary btn-sm rounded-pill mb-2">
+                                            <i class="fas fa-eye me-1"></i>View Agreement Details
+                                        </a>
+
+                                        <a href="#" class="btn btn-outline-primary btn-sm rounded-pill">
+                                            <i class="fas fa-edit me-1"></i>View Job Post Details
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <div class="alert alert-info mb-0">
+                    <i class="fas fa-info-circle me-2"></i>
+                    No job agreements found.
+                </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
 </div>
-<hr>
-{% empty %}
-<p>No job agreements found.</p>
-{% endfor %}
+
+<style>
+    .agreement-card {
+        transition: transform 0.2s ease-in-out;
+        border-radius: 0.75rem;
+    }
+    .agreement-card:hover {
+        transform: translateY(-3px);
+    }
+    .bg-primary-soft {
+        background-color: rgba(76, 175, 80, 0.1);
+    }
+    .bg-info-soft {
+        background-color: rgba(23, 162, 184, 0.1);
+    }
+    .bg-success-soft {
+        background-color: rgba(40, 167, 69, 0.1);
+    }
+    .bg-warning-soft {
+        background-color: rgba(255, 193, 7, 0.1);
+    }
+</style>
 {% endblock %}

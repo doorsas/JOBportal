@@ -2,7 +2,7 @@ from django.urls import path
 from . import views
 from .views import employer_list, employer_dashboard,create_job_post,\
     create_job_agreement_from_post,employer_job_posts,jobpost_detail,\
-    JobAgreementWaitingListView,employer_job_posts1,EmployerAgreementsView
+    JobAgreementWaitingListView,EmployerAgreementsView
 
 app_name = "employer"
 

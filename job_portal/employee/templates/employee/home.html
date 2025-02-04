@@ -1,24 +1,24 @@
-{% extends 'base_employee.html' %}
+{% extends base_template %}
 
 {% block title %}Employee Dashboard - {{ username }}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-center align-items-center" style="min-height: 85vh;">
-    <div class="text-center bg-light p-5 rounded shadow">
+<div class="d-flex justify-content-center align-items-center" style="min-height: 85vh; background-color: #f4f7fc;">
+    <div class="text-center bg-white p-5 rounded shadow-lg" style="border-radius: 12px;">
         <!-- Welcome Section -->
-        <h1 class="mb-4 display-4">Welcome, {{ username }}</h1>
+        <h1 class="mb-4 display-4 text-primary">Welcome, {{ username }}</h1>
 
         <!-- Employee Details Section -->
         <div class="mb-5">
-            <h2 class="mb-4">Your Details</h2>
+            <h2 class="mb-4 text-secondary">Your Details</h2>
             <div class="list-group">
-                <div class="list-group-item">
+                <div class="list-group-item border-0">
                     <strong>Name:</strong> {{ employee.employee_name }}
                 </div>
-                <div class="list-group-item">
+                <div class="list-group-item border-0">
                     <strong>Email:</strong> {{ employee.email }}
                 </div>
-                <div class="list-group-item">
+                <div class="list-group-item border-0">
                     <strong>Phone:</strong> {{ employee.phone_number }}
                 </div>
             </div>
@@ -27,18 +27,18 @@
         <!-- CV Details Section -->
         {% if cv %}
             <div class="mb-5">
-                <h2 class="mb-4">CV Details</h2>
+                <h2 class="mb-4 text-secondary">CV Details</h2>
                 <div class="list-group">
-                    <div class="list-group-item">
+                    <div class="list-group-item border-0">
                         <strong>Education:</strong> {{ cv.education }}
                     </div>
-                    <div class="list-group-item">
+                    <div class="list-group-item border-0">
                         <strong>Experience:</strong> {{ cv.experience }}
                     </div>
-                    <div class="list-group-item">
+                    <div class="list-group-item border-0">
                         <strong>Skills:</strong> {{ cv.skills }}
                     </div>
-                    <div class="list-group-item">
+                    <div class="list-group-item border-0">
                         <strong>Created At:</strong> {{ cv.created_at }}
                     </div>
                 </div>
@@ -46,34 +46,29 @@
 
             <!-- Action Buttons -->
             <div class="d-grid gap-3 d-md-block">
-                <a href="{% url 'employee:cv_detail' employee.cv.id %}" class="btn btn-primary btn-lg me-2">View CV</a>
-                <a href="{% url 'employee:create_or_edit_cv' %}" class="btn btn-secondary btn-lg me-2">Edit CV</a>
-                <a href="{% url 'employee:employee_edit' employee.id %}" class="btn btn-warning btn-lg me-2">Edit Profile</a>
-                <a href="{% url 'employee:user_calendar' %}" class="btn btn-info btn-lg me-2">User Calendar</a>
+                <a href="{% url 'employee:cv_detail' employee.cv.id %}" class="btn btn-primary btn-lg me-2 shadow-sm">View CV</a>
+                <a href="{% url 'employee:create_or_edit_cv' %}" class="btn btn-secondary btn-lg me-2 shadow-sm">Edit CV</a>
+                <a href="{% url 'employee:employee_edit' employee.id %}" class="btn btn-warning btn-lg me-2 shadow-sm">Edit Profile</a>
+                <a href="{% url 'employee:user_calendar' %}" class="btn btn-info btn-lg me-2 shadow-sm">User Calendar</a>
             </div>
 
             <!-- Agreement Button (Moved Lower) -->
             <div class="mt-4">
-                <a href="{% url 'employee:generate_pdf' %}" class="btn btn-success btn-lg">Agreement Example</a>
-
+                <a href="{% url 'employee:generate_pdf' %}" class="btn btn-success btn-lg shadow-sm">Agreement Example</a>
             </div>
             <div class="mt-4">
-                <a href="{% url 'employer:employee-agreements' %}" class="btn btn-success btn-lg">My agreements</a>
-
+                <a href="{% url 'employer:employee-agreements' %}" class="btn btn-success btn-lg shadow-sm">My Agreements</a>
             </div>
 
         {% else %}
             <!-- No CV Message -->
             <div class="mb-5">
-                <p class="lead"><em>No CV available for this employer.</em></p>
-<!--                <a href="{% url 'employee:create_or_edit_cv' %}" class="btn btn-secondary btn-lg me-2">Create CV</a>-->
-
+                <p class="lead text-muted"><em>No CV available for this employer.</em></p>
             </div>
 
             <!-- Action Buttons -->
             <div class="d-grid gap-3 d-md-block">
-
-                <a href="{% url 'employee:user_calendar' %}" class="btn btn-info btn-lg">User Calendar</a>
+                <a href="{% url 'employee:user_calendar' %}" class="btn btn-info btn-lg shadow-sm">User Calendar</a>
             </div>
         {% endif %}
     </div>

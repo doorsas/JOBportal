@@ -185,7 +185,7 @@ class EmployerAgreementsView(LoginRequiredMixin, ListView):
         ).select_related('employee').order_by('-start_date')
 
 
-
+@login_required
 def create_job_agreement_from_post(request, job_post_id):
     job_post = get_object_or_404(JobPost, id=job_post_id)
 

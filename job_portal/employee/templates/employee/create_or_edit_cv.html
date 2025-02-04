@@ -1,4 +1,6 @@
-{% extends 'base_employee.html' %}
+{% extends base_template %}
+{% load widget_tweaks %}
+
 
 {% block title %}Create or Edit CV{% endblock %}
 
@@ -94,7 +96,7 @@
         {% for field in form %}
             <div class="form-group">
                 <label for="{{ field.id_for_label }}">{{ field.label }}</label>
-                {{ field }}
+                {% render_field field class="form-control" %}
                 {% if field.help_text %}
                     <small class="form-text">{{ field.help_text }}</small>
                 {% endif %}
