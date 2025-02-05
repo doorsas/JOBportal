@@ -79,7 +79,7 @@ def create_job_post(request):
             job_post = form.save(commit=False)
             job_post.employer = employer
             job_post.save()
-            return redirect('employer:employer_dashboard')
+            return redirect('employer:employer_job_posts1')
     else:
         form = JobPostForm()
     return render(request, 'employer/create_job_post.html', {'form': form})

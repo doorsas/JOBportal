@@ -6,7 +6,7 @@
 <div class="container-fluid py-5">
     <div class="container-lg">
         <!-- Dashboard Heading -->
-        <h1 class="mb-5 text-center display-4 fw-bold text-primary">Employer Dashboard</h1>
+        <h1 class="mb-5 text-center display-4 fw-bold text-primary">Job Posts</h1>
 
         <!-- Employer Cards -->
         {% for employer in employers %}
@@ -52,7 +52,13 @@
                                                     </span>
                                                 </div>
                                                 <p class="text-muted mb-0">{{ job.description|truncatewords:30 }}</p>
+                                                <small>
+    <a href="{% url 'employer:jobpost_detail' job.id %}" class="text-secondary fw-light" target="_blank">
+        View Full Description
+    </a>
+</small>
                                             </div>
+
                                             <!-- Submit CV Button -->
                                             {% if request.user.is_authenticated and request.user.employee %}
                                             <div class="d-flex flex-column align-items-end">
@@ -65,6 +71,8 @@
                                                 <small class="text-muted mt-2">Expires in 5 days</small>
                                             </div>
                                             {% endif %}
+
+
                                         </div>
                                     </div>
                                 </div>

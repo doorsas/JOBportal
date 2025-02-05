@@ -325,10 +325,6 @@ def submit_cv(request, job_id):
     return redirect('employer:employer_dashboard')
 
 
-
-
-
-
 @csrf_exempt
 def toggle_booking(request, date_str):
     if request.method == 'POST':
@@ -386,3 +382,13 @@ def user_calendar(request):
     # Pass weeks to the template
     context = {'calendar_weeks': calendar_weeks, 'total_booked':total_booked}
     return render(request, 'employee/calendar.html', context)
+
+
+
+
+@login_required
+def employee_applications(request):
+    employee = request.user.employee  # Get the logged-in employee
+    applications = JobApplication.objects.filter(employee=employee).select_related('job_post')
+
+    return render(request, 'employee/job_applications.html', {'applications': applications})

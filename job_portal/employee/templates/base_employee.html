@@ -32,18 +32,28 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto align-items-center">
-                    <li class="nav-item mx-2">
-                        <a class="nav-link text-light fs-5" href="{% url 'employee:employee_register' %}">Register as Employee</a>
-                    </li>
+<!--                    <li class="nav-item mx-2">-->
+<!--                        <a class="nav-link text-light fs-5" href="{% url 'employee:employee_register' %}">Register as Employee</a>-->
+<!--                    </li>-->
                     <li class="nav-item mx-2">
                         <a class="nav-link text-light fs-5" href="{% url 'employer:employer_dashboard' %}">Job Offers</a>
                     </li>
-                    <li class="nav-item mx-2">
-                        <a class="nav-link text-light fs-5" href="{% url 'employee:create_or_edit_cv' %}">Create or Edit CV</a>
-                    </li>
+
                     <li class="nav-item mx-2">
                         <a class="nav-link text-light fs-5" href="{% url 'employer:employee-agreements' %}">Job Agreements</a>
                     </li>
+                    <li class="nav-item mx-2">
+                        <a class="nav-link text-light fs-5" href="{% url 'employee:create_or_edit_cv' %}">My CV</a>
+                    </li>
+                    <li class="nav-item mx-2">
+                        <a class="nav-link text-light fs-5" href="{% url 'employee:user_calendar' %}">Calendar</a>
+                    </li>
+                    <li class="nav-item mx-2">
+                        <a class="nav-link text-light fs-5" href="{% url 'employee:employee_applications' %}">Applications</a>
+                    </li>
+
+
+
                     <li class="nav-item mx-2">
                         <a class="btn btn-outline-light btn-sm fw-bold px-3" href="{% url 'employee:home' %}">My Info</a>
                     </li>
