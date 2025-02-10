@@ -318,6 +318,8 @@ def register_match(request, cv_id):
 def confirm_match(request, cv_id, job_post_id):
     cv = get_object_or_404(CV, id=cv_id)
     employee = cv.employee
+    employee_id = cv.employee
+
     employer = get_object_or_404(Employer, user=request.user)
     job_post = get_object_or_404(JobPost, id=job_post_id)
 
@@ -338,6 +340,22 @@ def confirm_match(request, cv_id, job_post_id):
             cv=cv
         )
 
+    try:
+        application = JobApplication.objects.get(cv_id=cv_id, job_post_id=job_post_id)
+        application.status = 'accepted'  # Change to the desired status (e.g., 'reviewed', 'accepted', 'rejected')
+    # Step 3: Save the instance
+        application.save()
+        print(f"Updated status of {application} to {application.status}")
+
+    except JobApplication.DoesNotExist:
+        print("JobApplication not found.")
+    # Handle the case where the application doesn't exist
+
+    # Step 2: Update the status
+
+
     return redirect('employer:match_success')
+
+
 def match_success(request):
     return render(request, "employer/match_success.html")

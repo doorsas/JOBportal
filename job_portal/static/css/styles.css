@@ -526,3 +526,100 @@ body {
         font-size: 0.8rem;
     }
 }
+/* Table Styling */
+.employee-assignments-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: #fff;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.employee-assignments-table th,
+.employee-assignments-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.employee-assignments-table th {
+    background-color: #f5f5f5;
+    font-weight: 500;
+    color: #333;
+}
+
+.employee-assignments-table tbody tr:hover {
+    background-color: #f9f9f9;
+}
+
+/* Status Badges */
+.status-badge {
+    display: inline-block;
+    padding: 0.375rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.875rem;
+    font-weight: 500;
+}
+
+.status-active {
+    background-color: rgba(25, 135, 84, 0.1);
+    color: #198754;
+}
+
+.status-pending {
+    background-color: rgba(255, 193, 7, 0.1);
+    color: #ffc107;
+}
+
+.status-completed {
+    background-color: rgba(108, 117, 125, 0.1);
+    color: #6c757d;
+}
+
+/* CV Button Styling */
+.btn-view-cv {
+    background-color: #4CAF50;
+    color: white;
+    padding: 0.375rem 0.75rem;
+    border-radius: 6px;
+    font-size: 0.875rem;
+    text-decoration: none;
+    transition: background-color 0.2s ease;
+}
+
+.btn-view-cv:hover {
+    background-color: #45a049;
+}
+
+.no-cv {
+    color: #666;
+    font-style: italic;
+}
+
+/* Alert Styling */
+.alert-info {
+    background-color: rgba(23, 162, 184, 0.1);
+    border-color: rgba(23, 162, 184, 0.2);
+    color: #17a2b8;
+    padding: 0.75rem;
+    border-radius: 6px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .employee-assignments-table {
+        display: block;
+        overflow-x: auto;
+    }
+
+    .employee-assignments-table th,
+    .employee-assignments-table td {
+        padding: 0.75rem;
+    }
+
+    .btn-view-cv {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+    }
+}
