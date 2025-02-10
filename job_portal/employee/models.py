@@ -2,6 +2,7 @@ from django.contrib.auth.models import User
 from datetime import date, timedelta
 from django.db import models
 from django.contrib.auth import get_user_model
+from django.utils.timezone import now
 
 User = get_user_model()
 
@@ -66,6 +67,36 @@ class JobApplication(models.Model):
 
     def __str__(self):
         return f"{self.employee} applied for {self.job_post.title}"
+
+
+class Payment(models.Model):
+    STATUS_CHOICES = [
+        ('alga', 'Alga'),
+        ('avansinis', 'Avansinis'),
+        ('atskaitymas', 'Atskaitymas'),
+
+    ]
+
+    employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="payments")
+    invoice_number = models.CharField(max_length=50, unique=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=10, default="EUR")
+    invoice_date = models.DateField(default=now)
+    payment_date = models.DateField(null=True, blank=True)
+    mokejimo_tipas = models.CharField(max_length=20, choices=STATUS_CHOICES, default='alga')
+    notes = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    document = models.FileField(upload_to='employee_payments_documents/', blank=True, null=True, verbose_name="Document")
+
+    def __str__(self):
+        return f"Invoice {self.invoice_number} - {self.mokejimo_tipas} ({self.amount} {self.currency})"
+
+    class Meta:
+        ordering = ['-invoice_date']
+        verbose_name = "Payment"
+        verbose_name_plural = "Payments"
+
 
 
 

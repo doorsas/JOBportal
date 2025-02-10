@@ -2,89 +2,44 @@
 
 {% block title %}Agreement with {{ agreement.employee.employee_name }}{% endblock %}
 
-{% block extra_css %}
-<style>
-    /* Custom CV Detail Styles */
-    .cv-detail-container {
-        max-width: 800px;
-        margin: 2rem auto;
-        padding: 2rem;
-        background-color: #fff;
-        border-radius: 8px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-
-    .cv-detail-container h1 {
-        text-align: center;
-        margin-bottom: 1.5rem;
-        font-size: 2rem;
-        color: #343a40;
-    }
-
-    .cv-detail-container p {
-        font-size: 1.1rem;
-        line-height: 1.6;
-        color: #495057;
-    }
-
-    .cv-detail-container strong {
-        color: #6a11cb; /* Purple color for headings */
-    }
-
-    .cv-detail-container .btn {
-        margin-top: 1.5rem;
-        padding: 0.75rem 1.5rem;
-        font-size: 1rem;
-        font-weight: 500;
-        border-radius: 4px;
-        transition: background-color 0.3s ease;
-    }
-
-    .cv-detail-container .btn-secondary {
-        background-color: #6a11cb;
-        border: none;
-        color: #fff;
-    }
-
-    .cv-detail-container .btn-secondary:hover {
-        background-color: #2575fc; /* Blue on hover */
-    }
-
-    /* Page Break Styles */
-    @media print {
-        .page-break {
-            page-break-after: always; /* Force a page break after each section */
-        }
-    }
-</style>
-{% endblock %}
-
 {% block content %}
-<div class="cv-detail-container">
-    <h1>Agreement with {{ agreement.employee }}</h1>
+<div class="container mt-5">
+    <div class="card shadow-sm">
+        <div class="card-header bg-primary text-white">
+            <h1 class="card-title mb-0">Agreement with {{ agreement.employee }}</h1>
+        </div>
+        <div class="card-body">
+            <!-- Employee Section -->
+            <div class="mb-4">
+                <h4 class="text-secondary">Employee Details</h4>
+                <hr class="my-2">
+                <p class="mb-1"><strong>Employee Name:</strong></p>
+                <p class="text-muted">{{ agreement.employee }}</p>
+            </div>
 
-    <!-- Education Section -->
-    <div class="mb-4 page-break">
-        <p><strong>Employee :</strong></p>
-        <p>{{ agreement.employee }}</p>
+            <!-- Status Section -->
+            <div class="mb-4">
+                <h4 class="text-secondary">Agreement Status</h4>
+                <hr class="my-2">
+                <p class="mb-1"><strong>Status:</strong></p>
+                <p class="text-muted">{{ agreement.status }}</p>
+            </div>
+
+            <!-- Created At Section -->
+            <div class="mb-4">
+                <h4 class="text-secondary">Agreement Date</h4>
+                <hr class="my-2">
+                <p class="mb-1"><strong>Created At:</strong></p>
+                <p class="text-muted">{{ agreement.created_at }}</p>
+            </div>
+
+            <!-- Back Button -->
+            <div class="mt-4">
+                <a href="{% url 'employer:employer_agreements' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left me-2"></i>Back to Agreements List
+                </a>
+            </div>
+        </div>
     </div>
-
-    <!-- Experience Section -->
-    <div class="mb-4 page-break">
-        <p><strong>Status:</strong></p>
-        <p>{{ agreement.status }}</p>
-    </div>
-
-    <!-- Skills Section -->
-    <div class="mb-4 page-break">
-        <p><strong>Created at:</strong></p>
-        <p>{{ agreement.created_at }}</p>
-    </div>
-
-
-    <!-- Professional Experience Section -->
-
-    <!-- Back Button -->
-    <a href="{% url 'employer:employer_agreements' %}" class="btn btn-secondary">Back to Agreements List</a>
 </div>
 {% endblock %}

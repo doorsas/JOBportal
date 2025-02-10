@@ -3,73 +3,78 @@
 {% block title %}Employee Dashboard - {{ username }}{% endblock %}
 
 {% block content %}
-<div class="d-flex justify-content-center align-items-center" style="min-height: 85vh; background-color: #f4f7fc;">
-    <div class="text-center bg-white p-5 rounded shadow-lg" style="border-radius: 12px;">
-        <!-- Welcome Section -->
-        <h1 class="mb-4 display-4 text-primary">Welcome, {{ username }}</h1>
+<div class="dashboard-container">
+    <!-- Welcome Section -->
+    <div class="welcome-section">
+        <h1>Welcome, {{ username }}</h1>
+    </div>
 
+    <div class="dashboard-content">
         <!-- Employee Details Section -->
-        <div class="mb-5">
-            <h2 class="mb-4 text-secondary">Your Details</h2>
-            <div class="list-group">
-                <div class="list-group-item border-0">
-                    <strong>Name:</strong> {{ employee.employee_name }}
+        <section class="info-section">
+            <h2>Personal Information</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="label">Name</span>
+                    <span class="value">{{ employee.employee_name }}</span>
                 </div>
-                <div class="list-group-item border-0">
-                    <strong>Email:</strong> {{ employee.email }}
+                <div class="info-item">
+                    <span class="label">Email</span>
+                    <span class="value">{{ employee.email }}</span>
                 </div>
-                <div class="list-group-item border-0">
-                    <strong>Phone:</strong> {{ employee.phone_number }}
+                <div class="info-item">
+                    <span class="label">Phone</span>
+                    <span class="value">{{ employee.phone_number }}</span>
                 </div>
             </div>
-        </div>
+        </section>
 
         <!-- CV Details Section -->
         {% if cv %}
-            <div class="mb-5">
-                <h2 class="mb-4 text-secondary">CV Details</h2>
-                <div class="list-group">
-                    <div class="list-group-item border-0">
-                        <strong>Education:</strong> {{ cv.education }}
-                    </div>
-                    <div class="list-group-item border-0">
-                        <strong>Experience:</strong> {{ cv.experience }}
-                    </div>
-                    <div class="list-group-item border-0">
-                        <strong>Skills:</strong> {{ cv.skills }}
-                    </div>
-                    <div class="list-group-item border-0">
-                        <strong>Created At:</strong> {{ cv.created_at }}
-                    </div>
+        <section class="info-section">
+            <h2>CV Details</h2>
+            <div class="info-grid">
+                <div class="info-item">
+                    <span class="label">Education</span>
+                    <span class="value">{{ cv.education }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Experience</span>
+                    <span class="value">{{ cv.experience }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Skills</span>
+                    <span class="value">{{ cv.skills }}</span>
+                </div>
+                <div class="info-item">
+                    <span class="label">Created</span>
+                    <span class="value">{{ cv.created_at }}</span>
                 </div>
             </div>
+        </section>
 
-            <!-- Action Buttons -->
-            <div class="d-grid gap-3 d-md-block">
-                <a href="{% url 'employee:cv_detail' employee.cv.id %}" class="btn btn-primary btn-lg me-2 shadow-sm">View CV</a>
-                <a href="{% url 'employee:create_or_edit_cv' %}" class="btn btn-secondary btn-lg me-2 shadow-sm">Edit CV</a>
-                <a href="{% url 'employee:employee_edit' employee.id %}" class="btn btn-warning btn-lg me-2 shadow-sm">Edit Profile</a>
-                <a href="{% url 'employee:user_calendar' %}" class="btn btn-info btn-lg me-2 shadow-sm">User Calendar</a>
+        <!-- Action Buttons -->
+        <section class="action-section">
+            <div class="primary-actions">
+                <a href="{% url 'employee:cv_detail' employee.cv.id %}" class="btn-primary">View CV</a>
+                <a href="{% url 'employee:create_or_edit_cv' %}" class="btn-secondary">Edit CV</a>
+                <a href="{% url 'employee:employee_edit' employee.id %}" class="btn-secondary">Edit Profile</a>
+                <a href="{% url 'employee:user_calendar' %}" class="btn-secondary">Calendar</a>
             </div>
 
-            <!-- Agreement Button (Moved Lower) -->
-            <div class="mt-4">
-                <a href="{% url 'employee:generate_pdf' %}" class="btn btn-success btn-lg shadow-sm">Agreement Example</a>
+            <div class="secondary-actions">
+                <a href="{% url 'employee:generate_pdf' %}" class="btn-outline">Agreement Example</a>
+                <a href="{% url 'employer:employee-agreements' %}" class="btn-outline">My Agreements</a>
             </div>
-            <div class="mt-4">
-                <a href="{% url 'employer:employee-agreements' %}" class="btn btn-success btn-lg shadow-sm">My Agreements</a>
-            </div>
+        </section>
 
         {% else %}
-            <!-- No CV Message -->
-            <div class="mb-5">
-                <p class="lead text-muted"><em>No CV available for this employer.</em></p>
+        <section class="info-section">
+            <p class="no-cv-message">No CV available. Create your CV to get started.</p>
+            <div class="action-section">
+                <a href="{% url 'employee:user_calendar' %}" class="btn-primary">User Calendar</a>
             </div>
-
-            <!-- Action Buttons -->
-            <div class="d-grid gap-3 d-md-block">
-                <a href="{% url 'employee:user_calendar' %}" class="btn btn-info btn-lg shadow-sm">User Calendar</a>
-            </div>
+        </section>
         {% endif %}
     </div>
 </div>

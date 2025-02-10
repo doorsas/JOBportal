@@ -1,5 +1,5 @@
 from .forms import CVForm, EmployeeRegistrationForm, LoginForm,EmployeeEditForm
-from .models import CV, Employee, JobApplication
+from .models import CV, Employee, JobApplication, Payment
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
@@ -21,6 +21,8 @@ from django.conf import settings
 from .utils import generate_confirmation_token, confirm_token
 from django.views.decorators.csrf import csrf_protect
 from employer.models import JobPost
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.views.generic import ListView
 
 
 
@@ -392,3 +394,29 @@ def employee_applications(request):
     applications = JobApplication.objects.filter(employee=employee).select_related('job_post')
 
     return render(request, 'employee/job_applications.html', {'applications': applications})
+
+
+class EmployeePaymentsView(LoginRequiredMixin, ListView):
+    model = Payment
+    template_name = 'employee/payments_list.html'
+    context_object_name = 'payments'
+    paginate_by = 10
+
+    def dispatch(self, request, *args, **kwargs):
+        # Ensure user is an employer
+        if not hasattr(request.user, 'employee'):
+            return render(
+                request,
+                "employer/error.html",
+                {
+                    "message": "You are not authorized to view this page."
+                },
+                status=403  # Forbidden status
+            )
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        # Get payments related to the logged-in employer
+        return Payment.objects.filter(
+            employee=self.request.user.employee
+        ).order_by('-invoice_date')

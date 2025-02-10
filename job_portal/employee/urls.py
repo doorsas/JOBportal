@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .views import EmployeePaymentsView
 
 
 app_name = 'employee'
@@ -26,6 +27,7 @@ urlpatterns = [
     path('registration-pending/', views.registration_pending, name='registration_pending'),
     path('registration-failed/', views.registration_failed, name='registration_failed'),
     path('my-applications/', views.employee_applications, name='employee_applications'),
+    path('payments/', EmployeePaymentsView.as_view(), name='payments'),
 
 ]
 

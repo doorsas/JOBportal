@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Employee,CV,JobApplication
+from .models import Employee,CV,JobApplication,Payment
 
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):
@@ -17,3 +17,8 @@ class CVAdmin(admin.ModelAdmin):
 class JobApplicationAdmin(admin.ModelAdmin):
     list_display = ('employee', 'status')  # Customize fields for employer admin
     search_fields = ('created_at', 'status')
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = ('employee', 'mokejimo_tipas','amount', 'payment_date')  # Customize fields for employer admin
+    search_fields = ('created_at', 'mokejimo_tipas')

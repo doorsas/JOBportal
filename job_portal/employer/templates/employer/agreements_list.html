@@ -1,22 +1,5 @@
 {% extends base_template %}  <!-- Assuming you have a base template -->
-    {% block extra_css %}
-    <style>
-    /* Add this style block in your template */
-    .table.table-hover.table-striped {
-        color: #000 !important;  /* Force black text color */
-    }
 
-    /* Specific selector for table cells */
-    .table.table-hover.table-striped tbody td {
-        color: #000;
-    }
-
-    /* Header text color (optional) */
-    .table.table-hover.table-striped thead th {
-        color: #000;
-    }
-</style>
-    {% endblock %}
 {% block content %}
 <div class="container mt-4">
     <h2>Job Agreements</h2>
@@ -100,6 +83,6 @@
     </nav>
     {% endif %}
 </div>
-    <div><a href="{% url 'employer:payments' %}">Payments</div>
+
 
 {% endblock %}

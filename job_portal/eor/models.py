@@ -16,4 +16,4 @@ class EmployeeAssignment(models.Model):
     )
 
     def __str__(self):
-        return f"{self.employee} assigned to {self.employer} for {self.job_post.title}"
+        return f"{self.employee} assigned to {self.employer} for {self.job_post}"
