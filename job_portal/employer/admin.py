@@ -1,6 +1,6 @@
 # employer/admin.py
 from django.contrib import admin
-from .models import Employer,JobPost,JobAgreement
+from .models import Employer,JobPost,JobAgreement, Payment
 
 @admin.register(Employer)
 class EmployerAdmin(admin.ModelAdmin):
@@ -16,6 +16,11 @@ class JobPostAdmin(admin.ModelAdmin):
 class JobAgreementAdmin(admin.ModelAdmin):
     list_display = ('employer', 'created_at')  # Customize fields for employer admin
     search_fields = ('created_at', 'employer')
+
+@admin.register(Payment)
+class PaymentAdmin(admin.ModelAdmin):
+    list_display = ('employer', 'invoice_date','payment_date','status')  # Customize fields for employer admin
+    search_fields = ('invoice_date', 'employer','status')
 
 
 

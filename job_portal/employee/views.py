@@ -18,7 +18,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.models import User, Group
 from django.core.mail import send_mail
 from django.conf import settings
-from .utils import generate_confirmation_token
+from .utils import generate_confirmation_token, confirm_token
 from django.views.decorators.csrf import csrf_protect
 from employer.models import JobPost
 
@@ -130,7 +130,7 @@ def employee_register(request):
 
             # Send confirmation email
             confirmation_link = request.build_absolute_uri(
-                f"/confirm-email/{token}/"
+                f"/employee/confirm-email/{token}/"
             )
             send_mail(
                 'Confirm Your Email',
@@ -152,6 +152,7 @@ def registration_failed(request):
 
 
 def confirm_email(request, token):
+    print (token)
     email = confirm_token(token)
     if email:
         employee = Employee.objects.get(email=email)
@@ -296,8 +297,6 @@ def toggle_day_status(request):
 
 
 @login_required
-
-
 def submit_cv(request, job_id):
     job = get_object_or_404(JobPost, id=job_id)
 
@@ -313,7 +312,7 @@ def submit_cv(request, job_id):
         return redirect('employer:employer_dashboard')
     except CV.DoesNotExist:
         messages.error(request, "You must have a CV to apply for a job.")
-        return redirect('employee:create_cv')
+        return redirect('employee:create_or_edit_cv')
 
     # Check if the employee has already applied for this job
     if JobApplication.objects.filter(job_post=job, employee=employee).exists():
@@ -356,8 +355,11 @@ def toggle_booking(request, date_str):
 
 @login_required
 def user_calendar(request):
-    # Get the user's calendar
-    calendar = get_object_or_404(Calendar, user=request.user)
+    try:
+        calendar = get_object_or_404(Calendar, user=request.user)
+    except:
+        calendar = Calendar.objects.get_or_create(user=request.user, dates=dates)
+        print ('Kalendorius_sukurtas')
 
     # Get all dates from the calendar (convert from ISO string to date objects)
     all_dates = [date.fromisoformat(day) for day in calendar.dates]
@@ -384,11 +386,9 @@ def user_calendar(request):
     return render(request, 'employee/calendar.html', context)
 
 
-
-
 @login_required
 def employee_applications(request):
-    employee = request.user.employee  # Get the logged-in employee
+    employee = request.user.employee
     applications = JobApplication.objects.filter(employee=employee).select_related('job_post')
 
     return render(request, 'employee/job_applications.html', {'applications': applications})

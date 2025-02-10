@@ -1,6 +1,3 @@
-from django.db import models
-from django.contrib.auth.models import User
-
 from django.contrib.auth.models import User
 from datetime import date, timedelta
 from django.db import models
@@ -100,6 +97,8 @@ class Booking(models.Model):
     calendar = models.ForeignKey(Calendar, on_delete=models.CASCADE, related_name='bookings')
     date = models.DateField()
     is_booked = models.BooleanField(default=False)
+
+
 
 
 

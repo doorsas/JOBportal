@@ -1,14 +1,11 @@
 from .forms import JobPostForm, EmployerRegistrationForm,JobAgreementStatusForm
 from .models import JobPost
-from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import Group
-from django.shortcuts import render, redirect
 from .models import Employer  # Import the Employer model
 from django.shortcuts import get_object_or_404, redirect,render
 from django.db.models import Prefetch
 from employee.models import CV
-from django.views.generic import ListView
+from eor.models import EmployeeAssignment
 from employer.models import JobAgreement  # Update import based on your structure
 from datetime import date
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -19,35 +16,15 @@ from django import forms
 from django.http import HttpResponseForbidden
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
-from employer.models import JobPost
+from employer.models import JobPost,Payment
 from employee.models import JobApplication
+
 
 
 
 def today(request):
     return {'today': date.today()}
 
-# def employer_register(request):
-#     if request.method == 'POST':
-#         form = EmployerRegistrationForm(request.POST)
-#         if form.is_valid():
-#             user = form.save()
-#
-#             # Assign the user to the "Employer" group
-#             employer_group, created = Group.objects.get_or_create(name='Employer')
-#             employer_group.user_set.add(user)
-#
-#             # Create an Employer instance
-#             Employer.objects.create(
-#                 company_name=form.cleaned_data['company_name'],
-#                 email=user.email,
-#                 user=user
-#             )
-#
-#             return redirect('employer:create_job_post')  # Redirect to login or another page
-#     else:
-#         form = EmployerRegistrationForm()
-#     return render(request, 'employer/employer_register.html', {'form': form})
 
 def employer_register(request):
     if request.method == 'POST':
@@ -55,18 +32,13 @@ def employer_register(request):
         if form.is_valid():
             user = form.save()
 
-
-
             employer_group, created = Group.objects.get_or_create(name='Employer')
             employer_group.user_set.add(user)
-
 
         return redirect('employer:employer_dashboard')  # Redirect to login page after successful registration
     else:
         form = EmployerRegistrationForm()
     return render(request, 'employer/employer_register.html', {'form': form})
-
-
 
 
 @login_required
@@ -84,12 +56,6 @@ def create_job_post(request):
         form = JobPostForm()
     return render(request, 'employer/create_job_post.html', {'form': form})
 
-# @login_required
-# def employer_job_posts(request):
-#     employers = Employer.objects.prefetch_related('jobpost_set').all()
-#     return render(request, 'employer/employer_job_posts.html', {'employers': employers})
-#
-
 
 @login_required
 def employer_list(request):
@@ -97,11 +63,6 @@ def employer_list(request):
     employers = Employer.objects.all()
     return render(request, 'employer/employer_list.html', {'employers': employers})
 
-# @login_required
-# def employer_dashboard(request):
-#     # Query all Employer objects from the database
-#     employers = Employer.objects.all()
-#     return render(request, 'employer/employer_dashboard.html', {'employers': employers})
 
 @login_required
 def employer_dashboard(request):
@@ -121,8 +82,6 @@ def employer_job_posts(request, employer_id):
         'employer': employer,
         'job_posts': job_posts,
     })
-
-
 
 
 @login_required
@@ -145,6 +104,12 @@ def employer_job_posts1(request):
         "job_applications": job_applications,
     }
     return render(request, "employer/job_posts.html", context)
+
+
+@login_required
+def cv_detail(request, pk):
+    cv = get_object_or_404(CV, pk=pk)
+    return render(request, 'employer/cv_detail.html', {'cv': cv})
 
 
 @login_required
@@ -194,6 +159,33 @@ class EmployerAgreementsView(LoginRequiredMixin, ListView):
         return JobAgreement.objects.filter(
             employer=self.request.user.employer
         ).select_related('employee').order_by('-start_date')
+
+
+
+class EmployerPaymentsView(LoginRequiredMixin, ListView):
+    model = Payment
+    template_name = 'employer/payments_list.html'
+    context_object_name = 'payments'
+    paginate_by = 10
+
+    def dispatch(self, request, *args, **kwargs):
+        # Ensure user is an employer
+        if not hasattr(request.user, 'employer'):
+            return render(
+                request,
+                "employer/error.html",
+                {
+                    "message": "You are not authorized to view this page."
+                },
+                status=403  # Forbidden status
+            )
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        # Get payments related to the logged-in employer
+        return Payment.objects.filter(
+            employer=self.request.user.employer
+        ).order_by('-invoice_date')
 
 
 @login_required
@@ -288,3 +280,64 @@ def employee_job_agreements(request):
     return render(request, 'employee/job_agreements.html', {
         'agreement_forms': agreement_forms
     })
+
+@login_required
+def cv_detail_accept(request, pk):
+    cv = get_object_or_404(CV, pk=pk)
+    return render(request, 'employer/cv_detail.html', {'cv': cv})
+
+
+
+@login_required
+def register_match(request, cv_id):
+    cv = get_object_or_404(CV, id=cv_id)
+    employee = cv.employee
+    employer = get_object_or_404(Employer, user=request.user)
+
+    # Fetch job post that the CV was matched for (if applicable)
+    job_post = JobPost.objects.filter(employer=employer).first()  # Adjust logic as needed
+
+    existing_assignment = EmployeeAssignment.objects.filter(
+        employer=employer,
+        employee=employee,
+        job_post=job_post,
+        status='active'
+    ).first()
+
+    context = {
+        "employer": employer,
+        "employee": employee,
+        "cv": cv,
+        "job_post": job_post,  # Ensure this is passed to the template
+        "existing_assignment": existing_assignment,
+    }
+    return render(request, "employer/register_match.html", context)
+
+
+@login_required
+def confirm_match(request, cv_id, job_post_id):
+    cv = get_object_or_404(CV, id=cv_id)
+    employee = cv.employee
+    employer = get_object_or_404(Employer, user=request.user)
+    job_post = get_object_or_404(JobPost, id=job_post_id)
+
+    # Check if an active assignment already exists
+    existing_assignment = EmployeeAssignment.objects.filter(
+        employer=employer,
+        employee=employee,
+        job_post=job_post,
+        status='active'
+    ).first()
+
+    if not existing_assignment:
+        # Create a new assignment
+        EmployeeAssignment.objects.create(
+            employer=employer,
+            employee=employee,
+            job_post=job_post,
+            cv=cv
+        )
+
+    return redirect('employer:match_success')
+def match_success(request):
+    return render(request, "employer/match_success.html")

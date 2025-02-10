@@ -13,6 +13,7 @@ body {
 
 /* Navbar Styles */
 .navbar {
+
     background: linear-gradient(135deg, #4f46e5, #3730a3);
     padding: 1rem 2rem;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);

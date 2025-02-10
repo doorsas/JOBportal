@@ -2,10 +2,14 @@ from django.db import models
 from django.contrib.auth.models import User
 from employee.models import CV, Employee # Import CV model from the employee app
 from PIL import Image
+from django.utils.timezone import now
+from django.core.mail import send_mail
+from django.core.exceptions import ValidationError
 
 class Employer(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)  # Link to User
     company_name = models.CharField(max_length=255, verbose_name="Įmonės pavadinimas")
+
     contact_name = models.CharField(max_length=255, verbose_name="Kontaktinis asmuo")
     email = models.EmailField(unique=True, verbose_name="El. paštas")
     phone_number = models.CharField(max_length=20, verbose_name="Telefono numeris")
@@ -13,6 +17,21 @@ class Employer(models.Model):
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Atnaujinta")
     is_active = models.BooleanField(default=False, verbose_name="Aktyvus")  # Aktyvuojama po el. pašto patvirtinimo
     logo = models.ImageField(blank=True, null=True, upload_to='employer_logos/')
+    has_agreement = models.BooleanField(default=False, verbose_name="Sutartis")
+
+    '''
+    Įmonės registracija:
+    Trumpas veiklos aprašymas
+    Registro numeris
+    PVM numeris
+    Buveinės adresas
+    Telefonas
+    El.paštas
+    Administratoriaus vardas pavardė (tik jis gali pridėt kitus vartotojus prie įmonės)
+    Telefonas
+    El paštas
+    Sąskaitų siuntimo el paštas + apskaitos telefonas
+    '''
 
     def __str__(self):
         return self.company_name
@@ -36,26 +55,6 @@ class Employer(models.Model):
                 img.save(logo_path)  # Save the resized image back to the same path
             except Exception as e:
                 print(f"Error resizing logo: {e}")
-
-
-
-
-'''
-Įmonės registracija:
-Logo (neprivaloma)
-Trumpas veiklos aprašymas
-Registro numeris
-PVM numeris
-Buveinės adresas
-Telefonas
-El.paštas
-Administratoriaus vardas pavardė (tik jis gali pridėt kitus vartotojus prie įmonės)
-Telefonas
-El paštas
-Sąskaitų siuntimo el paštas + apskaitos telefonas
-'''
-
-
 
 
 class JobPost(models.Model):
@@ -110,7 +109,7 @@ class JobPost(models.Model):
     employer = models.ForeignKey(Employer, on_delete=models.CASCADE)
     title = models.CharField(max_length=255)
     description = models.TextField()
-    location = models.CharField(max_length=255,choices=EUROPEAN_COUNTRIES)
+    location = models.CharField(max_length=255, choices=EUROPEAN_COUNTRIES)
     salary_range = models.CharField(max_length=100)
     created_at = models.DateTimeField(auto_now_add=True)
 
@@ -207,6 +206,82 @@ class JobAgreement(models.Model):
         - Ensure acceptance_date is after offer_date
         - Verify start_date is after acceptance_date
         - Check termination_date is after start_date if exists
+        - Ensure job_post and employer are correctly suited
         """
         super().clean()
 
+        # Ensure job_post and employer are correctly suited
+        if self.job_post and self.employer:
+            if self.job_post.employer != self.employer:
+                raise ValidationError({
+                    'job_post': "The selected job post does not belong to the specified employer.",
+                    'employer': "The selected employer does not match the employer of the job post."
+                })
+
+        # Ensure acceptance_date is after offer_date
+        if self.acceptance_date and self.offer_date:
+            if self.acceptance_date < self.offer_date:
+                raise ValidationError({
+                    'acceptance_date': "Acceptance date must be after the offer date."
+                })
+
+        # Verify start_date is after acceptance_date
+        if self.start_date and self.acceptance_date:
+            if self.start_date < self.acceptance_date:
+                raise ValidationError({
+                    'start_date': "Start date must be after the acceptance date."
+                })
+
+        # Check termination_date is after start_date if exists
+        if self.termination_date and self.start_date:
+            if self.termination_date < self.start_date:
+                raise ValidationError({
+                    'termination_date': "Termination date must be after the start date."
+                })
+
+
+
+class Payment(models.Model):
+    STATUS_CHOICES = [
+        ('pending', 'Pending'),
+        ('paid', 'Paid'),
+        ('overdue', 'Overdue'),
+        ('failed', 'Failed'),
+    ]
+
+    employer = models.ForeignKey(Employer, on_delete=models.CASCADE, related_name="payments")
+    invoice_number = models.CharField(max_length=50, unique=True)
+    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=10, default="EUR")
+    invoice_date = models.DateField(default=now)
+    due_date = models.DateField()
+    payment_date = models.DateField(null=True, blank=True)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='pending')
+    payment_proof = models.FileField(upload_to='payment_proofs/', blank=True, null=True)
+    notes = models.TextField(blank=True, null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    def check_payment_status(self):
+        """ Update payment status based on due date and payment date """
+        if self.payment_date:
+            self.status = 'paid'
+        elif self.due_date < now().date():
+            self.status = 'overdue'
+        self.save()
+
+    def send_invoice_reminder(self):
+        """ Send an email reminder to the employer about the upcoming or overdue invoice """
+        subject = f"Invoice Reminder: {self.invoice_number}"
+        message = f"Dear {self.employer.contact_name},\n\nYour invoice {self.invoice_number} is due on {self.due_date}. Please ensure payment is made on time.\n\nBest regards,\nYour Company"
+        recipient_list = [self.employer.email]
+
+        send_mail(subject, message, 'duomenuanalitikas@gmail.com', recipient_list)
+
+    def __str__(self):
+        return f"Invoice {self.invoice_number} - {self.status} ({self.amount} {self.currency})"
+
+    class Meta:
+        ordering = ['-invoice_date']
+        verbose_name = "Payment"
+        verbose_name_plural = "Payments"

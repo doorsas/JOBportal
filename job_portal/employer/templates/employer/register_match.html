@@ -1,0 +1,28 @@
+{% extends "base_employer.html" %}
+
+{% block title %}Register Match{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h2>Register Match</h2>
+
+    {% if employer and employee %}
+        <p><strong>Employer:</strong> {{ employer.name }}</p>
+        <p><strong>Employee:</strong> {{ employee.employee_name }}</p>
+        <p><strong>CV Details:</strong> {{ cv.education }}</p>
+
+        {% if existing_assignment %}
+            <p class="text-warning">This employee is already assigned to you.</p>
+        {% else %}
+            <a href="{% url 'employer:confirm_match' cv.id job_post.id %}" class="btn btn-success">Confirm Match</a>
+        {% endif %}
+    {% else %}
+        <p>Match details could not be found.</p>
+    {% endif %}
+
+    <a href="{% url 'employer:employer_job_posts1'%}" class="btn btn-secondary">Back to Job Listingss</a>
+</div>
+{% endblock %}
+
+
+
