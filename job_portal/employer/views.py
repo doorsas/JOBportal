@@ -1,5 +1,6 @@
 from .forms import JobPostForm, EmployerRegistrationForm,JobAgreementStatusForm
 from .models import JobPost
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.models import Group
 from .models import Employer  # Import the Employer model
 from django.shortcuts import get_object_or_404, redirect,render
@@ -18,6 +19,8 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from employer.models import JobPost,Payment
 from employee.models import JobApplication
+from django.views.decorators.csrf import csrf_exempt
+from django.views.decorators.csrf import csrf_protect
 
 
 
@@ -25,16 +28,17 @@ from employee.models import JobApplication
 def today(request):
     return {'today': date.today()}
 
-
+@csrf_protect
 def employer_register(request):
     if request.method == 'POST':
         form = EmployerRegistrationForm(request.POST, request.FILES)
         if form.is_valid():
             user = form.save()
-
+            login(request, user)
             employer_group, created = Group.objects.get_or_create(name='Employer')
             employer_group.user_set.add(user)
-
+        else:
+            print(form.errors)
         return redirect('employer:employer_dashboard')  # Redirect to login page after successful registration
     else:
         form = EmployerRegistrationForm()
@@ -75,7 +79,6 @@ def employer_dashboard(request):
 @login_required
 def employer_job_posts(request, employer_id):
     employer = get_object_or_404(Employer, id=employer_id)
-    print (employer)
     job_posts = JobPost.objects.filter(employer=employer)
 
     return render(request, 'employer_job_posts.html', {
@@ -301,6 +304,7 @@ def register_match(request, cv_id):
         employer=employer,
         employee=employee,
         job_post=job_post,
+        cv = cv,
         status='active'
     ).first()
 
@@ -328,6 +332,7 @@ def confirm_match(request, cv_id, job_post_id):
         employer=employer,
         employee=employee,
         job_post=job_post,
+        cv = cv,
         status='active'
     ).first()
 
@@ -340,18 +345,18 @@ def confirm_match(request, cv_id, job_post_id):
             cv=cv
         )
 
-    try:
-        application = JobApplication.objects.get(cv_id=cv_id, job_post_id=job_post_id)
-        application.status = 'accepted'  # Change to the desired status (e.g., 'reviewed', 'accepted', 'rejected')
-    # Step 3: Save the instance
-        application.save()
-        print(f"Updated status of {application} to {application.status}")
+    if not JobApplication.objects.filter(employee=employee, job_post=job_post,cv=cv).exists():
+        JobApplication.objects.create(employee=employee, job_post=job_post, cv=cv)
+    else:
+        try:
+            application = JobApplication.objects.get(employee=employee,cv=cv, job_post=job_post)
+            application.status = 'accepted'  # Change to the desired status (e.g., 'reviewed', 'accepted', 'rejected')
+            # Step 3: Save the instance
+            application.save()
 
-    except JobApplication.DoesNotExist:
-        print("JobApplication not found.")
-    # Handle the case where the application doesn't exist
+        except:
+            print(f"Updated status of {application} to {application.status}")
 
-    # Step 2: Update the status
 
 
     return redirect('employer:match_success')

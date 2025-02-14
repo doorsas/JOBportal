@@ -23,7 +23,16 @@ from django.views.decorators.csrf import csrf_protect
 from employer.models import JobPost
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import ListView
+from django.http import Http404
+from django.core.exceptions import ObjectDoesNotExist
+from .forms import PaymentFilterForm
+from django.shortcuts import render, redirect
+from django.contrib.auth import get_user_model
+from django.views.decorators.csrf import csrf_protect
+from .forms import EmployeeRegistrationForm
+from .models import Employee
 
+User = get_user_model()
 
 
 
@@ -50,16 +59,24 @@ def cv_detail(request, pk):
 
 @login_required
 def home(request):
-    cv = None
-    employee = None
-    try :
+    try:
         employee = get_object_or_404(Employee, user=request.user)
-        cv = get_object_or_404(CV, employee=employee)
+        cv = CV.objects.filter(employee=employee).first()
         return render(request, 'employee/home.html', {
-        'username': request.user.username, 'employee':employee, 'cv':cv })
-    except :
+            'username': request.user.username,
+            'employee': employee,
+            'cv': cv
+        })
+    except Http404:
         return render(request, 'employee/home.html', {
-        'username': request.user.username} )
+            'username': request.user.username
+        })
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+        return render(request, 'employee/home.html', {
+            'username': request.user.username,
+            'error': 'An unexpected error occurred.'
+        })
 
 
 @login_required
@@ -103,47 +120,20 @@ def employee_delete(request, pk):
 
 
 @csrf_protect
+
+@csrf_protect
 def employee_register(request):
     if request.method == 'POST':
         form = EmployeeRegistrationForm(request.POST)
         if form.is_valid():
-            # Create a new User object
-            user = User.objects.create_user(
-                username=form.cleaned_data['email'],  # Use email as the username
-                email=form.cleaned_data['email'],
-                password=form.cleaned_data['password1']  # Assuming the form has password fields
-            )
-
-            # Assign the user to the "Employee" group
+            user = form.save()  # Calls the save() method that creates both User and Employee
+            login(request, user)  # Log the user in after registration
             employee_group, created = Group.objects.get_or_create(name='Employee')
             employee_group.user_set.add(user)
+            return redirect('employee:home')  # Redirect to employee dashboard or homepage
+        else:
+            print(form.errors)  # Debugging: Show form errors in console
 
-            # Create an Employee instance
-            employee = Employee.objects.create(
-                employee_name=form.cleaned_data['employee_name'],
-                email=user.email,
-                user=user,
-                phone_number = form.cleaned_data['phone_number'],
-                is_email_verified=False  # Email is not verified yet
-            )
-
-            # Generate a confirmation token
-            token = generate_confirmation_token(employee.email)
-
-            # Send confirmation email
-            confirmation_link = request.build_absolute_uri(
-                f"/employee/confirm-email/{token}/"
-            )
-            send_mail(
-                'Confirm Your Email',
-                f'Please click the link below to confirm your email and registration to Drekar:\n\n{confirmation_link}',
-                settings.DEFAULT_FROM_EMAIL,
-                [form.cleaned_data['email']],
-                fail_silently=False,
-            )
-
-            # Redirect to a "pending confirmation" page
-            return redirect('employee:registration_pending')
     else:
         form = EmployeeRegistrationForm()
 
@@ -301,6 +291,7 @@ def toggle_day_status(request):
 @login_required
 def submit_cv(request, job_id):
     job = get_object_or_404(JobPost, id=job_id)
+    print (job)
 
     if not request.user.is_authenticated:
         messages.error(request, "You must be logged in to apply for a job.")
@@ -309,6 +300,7 @@ def submit_cv(request, job_id):
     try:
         employee = request.user.employee
         cv = employee.cv
+        print (cv)
     except Employee.DoesNotExist:
         messages.error(request, "You must be an employee to apply for a job.")
         return redirect('employer:employer_dashboard')
@@ -355,13 +347,16 @@ def toggle_booking(request, date_str):
 
 
 
+
+
 @login_required
 def user_calendar(request):
     try:
-        calendar = get_object_or_404(Calendar, user=request.user)
-    except:
-        calendar = Calendar.objects.get_or_create(user=request.user, dates=dates)
-        print ('Kalendorius_sukurtas')
+        calendar = Calendar.objects.get(user=request.user)
+    except ObjectDoesNotExist:
+        calendar, created = Calendar.objects.get_or_create(user=request.user)
+        if created:
+            print('Kalendorius sukurtas')
 
     # Get all dates from the calendar (convert from ISO string to date objects)
     all_dates = [date.fromisoformat(day) for day in calendar.dates]
@@ -396,27 +391,39 @@ def employee_applications(request):
     return render(request, 'employee/job_applications.html', {'applications': applications})
 
 
+
+
 class EmployeePaymentsView(LoginRequiredMixin, ListView):
     model = Payment
     template_name = 'employee/payments_list.html'
     context_object_name = 'payments'
     paginate_by = 10
 
-    def dispatch(self, request, *args, **kwargs):
-        # Ensure user is an employer
-        if not hasattr(request.user, 'employee'):
-            return render(
-                request,
-                "employer/error.html",
-                {
-                    "message": "You are not authorized to view this page."
-                },
-                status=403  # Forbidden status
-            )
-        return super().dispatch(request, *args, **kwargs)
-
     def get_queryset(self):
-        # Get payments related to the logged-in employer
-        return Payment.objects.filter(
-            employee=self.request.user.employee
-        ).order_by('-invoice_date')
+        queryset = Payment.objects.filter(employee=self.request.user.employee).order_by('-invoice_date')
+        form = PaymentFilterForm(self.request.GET)
+
+        if form.is_valid():
+            min_amount = form.cleaned_data.get('min_amount')
+            max_amount = form.cleaned_data.get('max_amount')
+            start_date = form.cleaned_data.get('start_date')
+            end_date = form.cleaned_data.get('end_date')
+
+            if min_amount is not None:
+                queryset = queryset.filter(amount__gte=min_amount)
+            if max_amount is not None:
+                queryset = queryset.filter(amount__lte=max_amount)
+            if start_date is not None:
+                queryset = queryset.filter(invoice_date__gte=start_date)
+            if end_date is not None:
+                queryset = queryset.filter(invoice_date__lte=end_date)
+
+        return queryset
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['filter_form'] = PaymentFilterForm(self.request.GET)
+        return context
+
+
+

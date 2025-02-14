@@ -37,7 +37,12 @@
                                         {{ assignment.get_status_display }}
                                     </span>
                                 </td>
-                                <td>{{ assignment.job_post }}</td>
+                                <td>  {% if assignment.job_post %}
+                                        <a href="{% url 'employer:jobpost_detail' assignment.job_post.id %}" class="btn btn-view-cv">View Job</a>
+                                    {% else %}
+                                        <span class="no-cv">No CV</span>
+                                    {% endif %}
+                                    </td>
                                 <td>
                                     {% if assignment.cv %}
                                         <a href="{% url 'employee:cv_detail' assignment.cv.id %}" class="btn btn-view-cv">View CV</a>
@@ -58,6 +63,7 @@
                             {% endfor %}
                         </tbody>
                     </table>
+                    <p><a href="javascript:history.back()">Back</a></p>
                 </div>
             </div>
         </div>

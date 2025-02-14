@@ -1,0 +1,60 @@
+{% extends base_template %}
+
+{% block title %}Employee CV{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-5">
+    <div class="container-lg">
+        <div class="card border-0 shadow-lg">
+            <div class="card-header bg-primary text-white py-4">
+                <h1 class="h3 mb-0">Employee CVs</h1>
+                <p class="mb-0 small">Manage and view employees CV</p>
+            </div>
+
+            <div class="card-body p-4">
+                <div class="table-responsive">
+                    <table class="employee-assignments-table">
+                        <thead>
+                            <tr>
+                                <th>Employee Name</th>
+                                <th>Employee Surname</th>
+                                <th>Skills</th>
+                                <th>Education</th>
+                                <th>Status</th>
+
+
+                            </tr>
+                        </thead>
+                        <tbody>
+
+                            {% for cv in cvs %}
+                            <tr>
+                                <td>{{ cv.employee }}</td>
+                                <td>{{ cv.name_surname }}</td>
+                                <td>{{ cv.skills }}</td>
+                                <td>{{ cv.education }}</td>
+                                <td>
+                                    <span class="status-badge status-{{ assignment.status|lower }}">
+                                        {{ cv.skills }}
+                                    </span>
+                                </td>
+
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="7" class="text-center py-4">
+                                    <div class="alert alert-info mb-0">
+                                        <i class="fas fa-info-circle me-2"></i>
+                                        No CV found.
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

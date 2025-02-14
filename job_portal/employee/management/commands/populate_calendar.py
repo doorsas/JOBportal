@@ -18,3 +18,4 @@ class Command(BaseCommand):
                 CalendarDay.objects.get_or_create(user=user, date=current_date, defaults={'is_free': True})
 
         self.stdout.write(self.style.SUCCESS('Calendar days populated for all users.'))
+

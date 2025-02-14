@@ -4,6 +4,8 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'  # Example for Gmail
 EMAIL_PORT = 587
@@ -12,6 +14,9 @@ EMAIL_HOST_USER = 'duomenuanalitikas@gmail.com'  # Your email address
 EMAIL_HOST_PASSWORD = os.getenv("GMAIL_K")  # Your email password
 print (EMAIL_HOST_PASSWORD)
 DEFAULT_FROM_EMAIL = 'duomenuanalitikas@gmail.com'
+
+AUTH_USER_MODEL = 'employee.CustomUser'
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -34,6 +39,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'django_extensions',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -44,7 +50,10 @@ INSTALLED_APPS = [
     'employee',
     'eor',
     'widget_tweaks',
+    'phonenumber_field',
+
 ]
+
 
 LOGIN_URL = '/'  # URL adresas prisijungimo puslapiui
 LOGIN_REDIRECT_URL = '/'  # Kur nukreipti vartotoją po sėkmingo prisijungimo

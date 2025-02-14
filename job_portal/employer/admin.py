@@ -4,8 +4,8 @@ from .models import Employer,JobPost,JobAgreement, Payment
 
 @admin.register(Employer)
 class EmployerAdmin(admin.ModelAdmin):
-    list_display = ('company_name', 'email')  # Customize fields for employer admin
-    search_fields = ('company_name', 'email')
+    list_display = ('company_name','user', 'user__email')  # Customize fields for employer admin
+    search_fields = ('company_name', 'user__email','user__first_name', 'user__last_name',)
 
 @admin.register(JobPost)
 class JobPostAdmin(admin.ModelAdmin):

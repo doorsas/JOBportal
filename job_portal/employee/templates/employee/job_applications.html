@@ -12,6 +12,7 @@
                     <th>Company</th>
                     <th>Status</th>
                     <th>Applied On</th>
+                    <th>Status updated at</th>
                 </tr>
             </thead>
             <tbody>
@@ -25,6 +26,8 @@
                             </span>
                         </td>
                         <td>{{ application.applied_at|date:"F j, Y" }}</td>
+                        <td>{{ application.status_updated_at|date:"F j, Y" }}</td>
+
                     </tr>
                 {% endfor %}
             </tbody>

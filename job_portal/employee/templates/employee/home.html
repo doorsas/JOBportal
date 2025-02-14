@@ -56,7 +56,7 @@
         <!-- Action Buttons -->
         <section class="action-section">
             <div class="primary-actions">
-                <a href="{% url 'employee:cv_detail' employee.cv.id %}" class="btn-primary">View CV</a>
+                <a href="{% url 'employee:cv_detail' cv.id %}" class="btn-primary">View CV</a>
                 <a href="{% url 'employee:create_or_edit_cv' %}" class="btn-secondary">Edit CV</a>
                 <a href="{% url 'employee:employee_edit' employee.id %}" class="btn-secondary">Edit Profile</a>
                 <a href="{% url 'employee:user_calendar' %}" class="btn-secondary">Calendar</a>
