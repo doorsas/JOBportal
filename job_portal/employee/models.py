@@ -9,6 +9,7 @@ from django.conf import settings
 
 # User = get_user_model()
 class CustomUser(AbstractUser):
+    email = models.EmailField(unique=True)
     phone_number = PhoneNumberField(blank=True, null=True)
     is_employer = models.BooleanField(default=False)
     is_employee = models.BooleanField(default=False)

@@ -120,20 +120,27 @@ def employee_delete(request, pk):
 
 
 @csrf_protect
-
-@csrf_protect
 def employee_register(request):
     if request.method == 'POST':
         form = EmployeeRegistrationForm(request.POST)
         if form.is_valid():
-            user = form.save()  # Calls the save() method that creates both User and Employee
-            login(request, user)  # Log the user in after registration
-            employee_group, created = Group.objects.get_or_create(name='Employee')
-            employee_group.user_set.add(user)
-            return redirect('employee:home')  # Redirect to employee dashboard or homepage
-        else:
-            print(form.errors)  # Debugging: Show form errors in console
+            user = form.save()  # Creates user but doesn't log them in
 
+            # Generate confirmation token
+            token = generate_confirmation_token(user.email)
+            confirmation_link = request.build_absolute_uri(
+                f"/employee/confirm-email/{token}/"
+            )
+
+            # Send email
+            send_mail(
+                'Confirm Your Email',
+                f'Click to confirm: {confirmation_link}',
+                settings.DEFAULT_FROM_EMAIL,
+                [user.email],
+                fail_silently=False,
+            )
+            return redirect('employee:registration_pending')
     else:
         form = EmployeeRegistrationForm()
 
@@ -144,17 +151,20 @@ def registration_failed(request):
 
 
 def confirm_email(request, token):
-    print (token)
     email = confirm_token(token)
     if email:
-        employee = Employee.objects.get(email=email)
-        employee.is_email_verified = True
-        employee.save()
-        messages.success(request, 'Your email has been confirmed!')
-        return redirect('employee:home')  # Redirect to the home page or login page
+        try:
+            user = User.objects.get(email=email)
+            employee = user.employee
+            employee.is_email_verified = True
+            employee.save()
+            messages.success(request, 'Email confirmed! You may now login.')
+            return redirect('employee:login_employee')
+        except User.DoesNotExist:
+            messages.error(request, 'User not found.')
     else:
-        messages.error(request, 'Invalid or expired confirmation link.')
-        return redirect('employee:registration_failed')
+        messages.error(request, 'Invalid or expired link.')
+    return redirect('employee:registration_failed')
 
 @login_required
 def employee_list(request):
@@ -178,25 +188,20 @@ def login_employee(request):
             username = form.cleaned_data.get('username')
             password = form.cleaned_data.get('password')
 
-            user = authenticate(request, username=username, password=password)
+            user = authenticate(username=username, password=password)
 
             if user is not None:
-                login(request, user)
-                messages.success(request, 'You are now logged in.')
-
-                # Check if the user has an associated Employee profile
                 if hasattr(user, 'employee'):
-                    return redirect('employer:employer_dashboard')  # Redirect to Employee dashboard
+                    if not user.employee.is_email_verified:
+                        messages.error(request, 'Verify your email first.')
+                        return redirect('employee:login_employee')
 
-                # Check if the user has an associated Employer profile
-                elif hasattr(user, 'employer'):
-                    return redirect('employer:create_job_post')  # Redirect to Employer dashboard
+                    login(request, user)
+                    return redirect('employee:home')
 
-                # If neither profile exists, you can add a fallback
-                messages.error(request, 'No profile associated with this account.')
-                return redirect('employee:home')
+                # Handle other user types
             else:
-                messages.error(request, 'Invalid username or password.')
+                messages.error(request, 'Invalid credentials.')
     else:
         form = LoginForm()
 
