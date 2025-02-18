@@ -21,9 +21,9 @@ class EmployeeAssignment(models.Model):
         choices=[('active', 'Active'), ('completed', 'Completed')],
         default='active'
     )
-    employer_payment = models.DecimalField(max_digits=10, decimal_places=2, help_text="Amount employer pays for the assignment")
-    employee_salary = models.DecimalField(max_digits=10, decimal_places=2, help_text="Amount paid to the employee")
-    manager_commission = models.DecimalField(max_digits=10, decimal_places=2, help_text="Commission earned by the manager", default=0)
+    employer_payment = models.DecimalField(max_digits=10, decimal_places=2,null=True, blank=True, help_text="Amount employer pays for the assignment")
+    employee_salary = models.DecimalField(max_digits=10, decimal_places=2,null=True, blank=True, help_text="Amount paid to the employee")
+    manager_commission = models.DecimalField(max_digits=10, decimal_places=2,null=True, blank=True, help_text="Commission earned by the manager", default=0)
 
     def calculate_profit(self):
         """

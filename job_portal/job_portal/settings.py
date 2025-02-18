@@ -35,7 +35,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
+BASE_URL = "https://example.com"
 # Application definition
 
 INSTALLED_APPS = [
@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'eor',
     'widget_tweaks',
     'phonenumber_field',
+    'django_countries',
 
 ]
 

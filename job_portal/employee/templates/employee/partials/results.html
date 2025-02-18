@@ -1,0 +1,9 @@
+{% for result in results %}
+<tr>
+    <td>{{ result.id}}</td>
+    <td>{{ result.user.email}}</td>
+    <td>{{ result.user.last_name}}</td>
+    <td> {{ result.user.first_name}} </td>
+    <td>{{ result.email}}</td>
+</tr>
+{% endfor %}

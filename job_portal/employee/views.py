@@ -1,39 +1,170 @@
 from .forms import CVForm, EmployeeRegistrationForm, LoginForm,EmployeeEditForm
-from .models import CV, Employee, JobApplication, Payment
-from django.contrib.auth.decorators import login_required
+from .models import JobApplication, Payment
 from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
-from django.http import HttpResponse
-from reportlab.pdfgen import canvas
 from .models import CalendarDay
 from datetime import date, timedelta
-from datetime import datetime
-from django.shortcuts import render, get_object_or_404, redirect
 from django.http import JsonResponse
-from .models import Calendar, Booking
 from django.views.decorators.csrf import csrf_exempt
-# from django.utils.dateparse import parse_date
 from dateutil.parser import parse as parse_date
-from django.shortcuts import render, redirect
-from django.contrib.auth.models import User, Group
-from django.core.mail import send_mail
-from django.conf import settings
+from django.contrib.auth.models import User
 from .utils import generate_confirmation_token, confirm_token
-from django.views.decorators.csrf import csrf_protect
 from employer.models import JobPost
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import ListView
 from django.http import Http404
 from django.core.exceptions import ObjectDoesNotExist
 from .forms import PaymentFilterForm
-from django.shortcuts import render, redirect
 from django.contrib.auth import get_user_model
 from django.views.decorators.csrf import csrf_protect
+from datetime import datetime
+import logging
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.models import Group
+from django.core.mail import send_mail
+from django.conf import settings
+from django.http import HttpResponse
+from django.utils.http import urlsafe_base64_encode
+from django.utils.encoding import force_bytes
+from django.contrib.auth.tokens import default_token_generator
+from django.views.generic import ListView, DetailView, View
+from reportlab.pdfgen import canvas
+from .models import Employee, CV, Calendar, Booking
+from django.shortcuts import render, redirect
 from .forms import EmployeeRegistrationForm
-from .models import Employee
+from django.db.models import Q
 
 User = get_user_model()
 
+logger = logging.getLogger(__name__)
+
+
+
+
+
+
+def index(request):
+    return render(request, "employee/index.html")
+
+def search(request):
+    q = request.GET.get('q')
+
+    print(q)
+
+    if q:
+        results = Employee.objects.filter(Q(national_id__icontains=q)) \
+        .order_by("user_id")[0:100]
+        print (results)
+    else:
+        results = []
+        print(results)
+
+    return render(request, "employee/partials/results.html", {"results": results})
+
+
+# Helper function to assign user roles using Django Groups
+def assign_role(user, role_name):
+    print(f"User: {user}, Type: {type(user)}")  # Debugging
+
+    if not isinstance(user, get_user_model()):
+        print("Error: user is not a valid User instance")
+        return  # Stop execution
+
+    group, created = Group.objects.get_or_create(name=role_name)
+    user.groups.add(group)  # Now safe to call
+
+
+class EmployeeRegistrationView(View):  # Class-based view
+    def get(self, request):
+        form = EmployeeRegistrationForm()
+        return render(request, 'employee/registration.html', {'form': form})
+
+
+    def post(self, request):
+        form = EmployeeRegistrationForm(request.POST)
+        if form.is_valid():
+            employee = form.save(commit=False)
+            employee.user = request.user
+            employee.save()
+            assign_role(request.user, "Employee")
+            self.send_confirmation_email(request.user)
+            return redirect('employee:home')
+        return render(request, 'employee/registration.html', {'form': form})
+
+    def send_confirmation_email(self, user):
+        token = default_token_generator.make_token(user)
+        uid = urlsafe_base64_encode(force_bytes(user.pk))
+        confirmation_link = f"/employee/confirm-email/{uid}/{token}/"
+        full_link = settings.BASE_URL + confirmation_link
+
+        send_mail(
+            'Confirm Your Email',
+            f'Click to confirm: {full_link}',
+            settings.DEFAULT_FROM_EMAIL,
+            [user.email],
+            fail_silently=False,
+        )
+
+
+# Employee List View (CBV)
+class EmployeeListView(LoginRequiredMixin, ListView):
+    model = Employee
+    template_name = 'employee/employee_list.html'
+    context_object_name = 'employees'
+    paginate_by = 10  # Paginate results
+
+
+# Employee Detail View (CBV)
+class EmployeeDetailView(LoginRequiredMixin, DetailView):
+    model = Employee
+    template_name = 'employee/detail.html'
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['cv'] = getattr(self.object, 'cv', None)
+        return context
+
+
+# User Calendar View
+@login_required
+def user_calendar(request):
+    calendar, created = Calendar.objects.get_or_create(user=request.user)
+    bookings = calendar.bookings.all().values("date", "is_booked")
+
+    return render(request, 'employee/calendar.html', {'bookings': bookings})
+
+
+# Toggle Booking View
+@login_required
+def toggle_booking(request, date_str):
+    try:
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d").date()
+        booking, created = Booking.objects.get_or_create(date=date_obj)
+        booking.is_booked = not booking.is_booked
+        booking.save()
+    except Exception as e:
+        logger.error(f"Error toggling booking: {e}")
+    return redirect('user_calendar')
+
+
+# Generate PDF View
+@login_required
+def generate_pdf(request):
+    if not hasattr(request.user, 'employee'):
+        return HttpResponse("Unauthorized", status=401)
+
+    employee = request.user.employee
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'inline; filename="{employee.user.username}_details.pdf"'
+
+    pdf = canvas.Canvas(response)
+    pdf.drawString(100, 750, f"Vilnius 2025 vasario ")
+    pdf.drawString(100, 680, f"Employee: First name:  {employee.user.first_name}")
+    pdf.drawString(100, 700, f"Employee Last name {employee.user.last_name}")
+    pdf.showPage()
+    pdf.save()
+
+    return response
 
 
 @login_required
@@ -54,6 +185,7 @@ def create_or_edit_cv(request):
 @login_required
 def cv_detail(request, pk):
     cv = get_object_or_404(CV, pk=pk)
+    print (cv)
     return render(request, 'employee/cv_detail.html', {'cv': cv})
 
 
@@ -118,33 +250,8 @@ def employee_delete(request, pk):
 
 
 
+#
 
-@csrf_protect
-def employee_register(request):
-    if request.method == 'POST':
-        form = EmployeeRegistrationForm(request.POST)
-        if form.is_valid():
-            user = form.save()  # Creates user but doesn't log them in
-
-            # Generate confirmation token
-            token = generate_confirmation_token(user.email)
-            confirmation_link = request.build_absolute_uri(
-                f"/employee/confirm-email/{token}/"
-            )
-
-            # Send email
-            send_mail(
-                'Confirm Your Email',
-                f'Click to confirm: {confirmation_link}',
-                settings.DEFAULT_FROM_EMAIL,
-                [user.email],
-                fail_silently=False,
-            )
-            return redirect('employee:registration_pending')
-    else:
-        form = EmployeeRegistrationForm()
-
-    return render(request, 'employee/employee_register.html', {'form': form})
 
 def registration_failed(request):
     return render(request, 'employee/registration_failed.html')
@@ -199,7 +306,13 @@ def login_employee(request):
                     login(request, user)
                     return redirect('employee:home')
 
-                # Handle other user types
+                elif hasattr(user, 'employer'):
+                    if not user.employer.is_email_verified:
+                        messages.error(request, 'Verify your email first.')
+                        return redirect('employer:employer_job_posts1')
+
+                    login(request, user)
+                    return redirect('employer:employer_job_posts1')
             else:
                 messages.error(request, 'Invalid credentials.')
     else:
@@ -215,28 +328,28 @@ def logout_employee(request):
     return redirect('employee:login_employee')
 
 
-@login_required
-def generate_pdf(request):
-    # Create the HTTP response with the PDF headers
-    response = HttpResponse(content_type='application/pdf')
-    response['Content-Disposition'] = 'inline; filename="employee_details.pdf"'
-    employee = get_object_or_404(Employee, user=request.user)
-    # Create the PDF object using ReportLab
-    pdf = canvas.Canvas(response)
-
-    # Add content to the PDF
-    pdf.drawString(250, 750, "Sutartis  Vilnius 2025 ")
-    pdf.drawString(100, 720, "Employee and CV Details")
-    pdf.drawString(100, 700, employee.employee_name)  # Example, replace with actual data
-    pdf.drawString(100, 680, employee.email)
-    pdf.drawString(100, 660, "Education: BSc in Computer Science")
-    pdf.drawString(100, 640, "Skills: Python, Django")
-
-    # Finalize the PDF
-    pdf.showPage()
-    pdf.save()
-
-    return response
+# @login_required
+# def generate_pdf(request):
+#     # Create the HTTP response with the PDF headers
+#     response = HttpResponse(content_type='application/pdf')
+#     response['Content-Disposition'] = 'inline; filename="employee_details.pdf"'
+#     employee = get_object_or_404(Employee, user=request.user)
+#     # Create the PDF object using ReportLab
+#     pdf = canvas.Canvas(response)
+#
+#     # Add content to the PDF
+#     pdf.drawString(250, 750, "Sutartis  Vilnius 2025 ")
+#     pdf.drawString(100, 720, "Employee and CV Details")
+#     pdf.drawString(100, 700, employee.user.first_name)  # Example, replace with actual data
+#     pdf.drawString(100, 680, employee.user.email)
+#     pdf.drawString(100, 660, "Education: BSc in Computer Science")
+#     pdf.drawString(100, 640, "Skills: Python, Django")
+#
+#     # Finalize the PDF
+#     pdf.showPage()
+#     pdf.save()
+#
+#     return response
 
 # @login_required
 # def user_calendar(request):

@@ -1,4 +1,6 @@
 {% extends 'base_employer.html' %}
+{% load countries %}
+
 
 {% block content %}
 <div class="container-fluid py-5">
@@ -25,7 +27,8 @@
 
                                         <div class="d-flex flex-wrap gap-2 mb-3">
                                             <span class="badge bg-primary-soft text-primary">
-                                                <i class="fas fa-map-marker-alt me-1"></i>{{ job.location }}
+
+                                                <i class="fas fa-map-marker-alt me-1"></i>{{ job.location.name }}
                                             </span>
                                             <span class="badge bg-success-soft text-success">
                                                 <i class="fas fa-wallet me-1"></i>{{ job.salary_range }}
@@ -51,12 +54,12 @@
                                                     <div class="avatar me-3">
                                                         <span class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center"
                                                               style="width: 40px; height: 40px;">
-                                                            {{ application.employee.employee_name|first|upper }}
+                                                            {{ application.employee.user.first_name|first|upper }}
                                                         </span>
                                                     </div>
                                                     <div>
-                                                        <h6 class="mb-1">{{ application.employee.employee_name }} {{ application.employee.employee_surname }}</h6>
-                                                        <small class="text-muted">{{ application.employee.email }}</small>
+                                                        <h6 class="mb-1">{{ application.employee.user.first_name }} {{ application.employee.user.last_name }}</h6>
+                                                        <small class="text-muted">{{ application.employee.user.email }}</small>
                                                     </div>
                                                 </div>
                                                 <div>
