@@ -96,7 +96,7 @@ class LoginForm(AuthenticationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={'autofocus': True}))
     password = forms.CharField(widget=forms.PasswordInput)
 
-# forms.py
+
 
 
 class PaymentFilterForm(forms.Form):

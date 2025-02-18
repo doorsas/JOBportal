@@ -11,9 +11,16 @@ from django.conf import settings
 class CustomUser(AbstractUser):
     email = models.EmailField(unique=True)
     phone_number = PhoneNumberField(blank=True, null=True)
+
     is_employer = models.BooleanField(default=False)
     is_employee = models.BooleanField(default=False)
     is_manager = models.BooleanField(default=False)
+
+    groups = models.ManyToManyField(Group, related_name="custom_users", blank=True)
+    user_permissions = models.ManyToManyField(Permission, related_name="custom_users_permissions", blank=True)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = ['username']
 
     class Meta:
         verbose_name = "User"
@@ -22,15 +29,24 @@ class CustomUser(AbstractUser):
     def __str__(self):
         return self.username
 
+    def assign_group(self):
+        """Automatically assign the user to a group based on role selection."""
+        if self.is_employer:
+            self.groups.add(Group.objects.get_or_create(name="Employers")[0])
+        if self.is_employee:
+            self.groups.add(Group.objects.get_or_create(name="Employees")[0])
+        if self.is_manager:
+            self.groups.add(Group.objects.get_or_create(name="Managers")[0])
+
 class Employee(models.Model):
-    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE)
+    user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     citizenship = models.CharField(max_length=100, default="Unknown")
-    national_id = models.BigIntegerField(blank=True, null=True, unique=True)
+    national_id = models.CharField(max_length=50, blank=True, null=True, unique=True)
     receive_special_offers = models.BooleanField(default=False)
     is_email_verified = models.BooleanField(default=False)
 
     def __str__(self):
-        return f"{self.user.first_name} {self.user.last_name}"
+        return f"{self.user.first_name or ''} {self.user.last_name or ''}".strip()
 
 
 class CV(models.Model):

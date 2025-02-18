@@ -61,7 +61,7 @@
 
 {% block content %}
 <div class="cv-detail-container">
-    <h1>CV of {{ cv.employee.employee_name }}</h1>
+    <h1>CV of {{ cv.employee.user.first_name}} {{cv.employee.user.last_name  }}</h1>
 
     <!-- Education Section -->
     <div class="mb-4 page-break">

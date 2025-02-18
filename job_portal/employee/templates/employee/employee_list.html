@@ -21,8 +21,8 @@
                 {% for employee in employees %}
                 <tr>
                     <td>{{ employee.id }}</td>
-                    <td>{{ employee.employee_name }}</td>
-                    <td>{{ employee.email }}</td>
+                    <td>{{ employee.user.first_name }}</td>
+                    <td>{{ employee.user.email }}</td>
                     <td>
                         {% if employee.cv %}
                             <a href="{% url 'employee:cv_detail' employee.cv.id %}" class="btn btn-view">View CV</a>

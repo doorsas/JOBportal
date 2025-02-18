@@ -126,6 +126,7 @@ def jobpost_detail(request, pk):
 @login_required
 def view_cv(request, cv_id):
     # Fetch the CV using the provided ID
+
     cv = get_object_or_404(CV, id=cv_id)
     return render(request, "employer/cv_detail.html", {"cv": cv})
 
