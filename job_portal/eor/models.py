@@ -91,9 +91,13 @@ from django.db import models
 from django.conf import settings
 from datetime import timedelta
 
+from django.db import models
+from django.conf import settings
+from datetime import timedelta
+
 class Contract(models.Model):
     """
-    Modelis, apibūdinantis santykį tarp Darbuotojo, Darbdavio ir Menedžerio.
+    Modelis, apibūdinantis darbo sutartį tarp darbuotojo, darbdavio ir menedžerio.
     """
     employee = models.ForeignKey(Employee, on_delete=models.PROTECT, related_name="contracts_as_employee")
     employer = models.ForeignKey(Employer, on_delete=models.PROTECT, related_name="contracts_as_employer")
@@ -108,18 +112,26 @@ class Contract(models.Model):
         (DAILY, "Už dieną"),
     ]
 
-    # Darbuotojo tarifas
+    # Darbuotojo tarifai
     employee_tariff_type = models.CharField(max_length=10, choices=TARIFF_CHOICES, default=HOURLY)
-    employee_hourly_rate = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Darbuotojo valandinis tarifas")
-    employee_daily_rate = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Darbuotojo dienos tarifas")
+    employee_hourly_rate = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Darbuotojo valandinis tarifas")
+    employee_daily_rate = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Darbuotojo dienos tarifas")
 
-    # Darbdavio tarifas
+    # Darbdavio tarifai
     employer_tariff_type = models.CharField(max_length=10, choices=TARIFF_CHOICES, default=HOURLY)
-    employer_hourly_rate = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Darbdavio valandinis tarifas")
-    employer_daily_rate = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True, help_text="Darbdavio dienos tarifas")
+    employer_hourly_rate = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Darbdavio valandinis tarifas")
+    employer_daily_rate = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Darbdavio dienos tarifas")
 
     # Menedžerio komisinių tarifas (%)
-    manager_commission = models.DecimalField(max_digits=5, decimal_places=2, help_text="Menedžerio komisinių procentas", default=0.00)
+    manager_commission = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, help_text="Menedžerio komisinių procentas")
+
+    # Dirbtos valandos ir dienos (saugomos rankiniu būdu arba automatiškai skaičiuojamos)
+    worked_hours = models.DecimalField(max_digits=6, decimal_places=2, default=0.00, help_text="Faktiškai išdirbtos valandos")
+    worked_days = models.DecimalField(max_digits=6, decimal_places=2, default=0.00, help_text="Faktiškai išdirbtos dienos")
+
+    # Dirbtos darbo valandos ir darbo dienos (atsižvelgiant į darbo grafiką)
+    business_hours = models.DecimalField(max_digits=6, decimal_places=2, default=0.00, help_text="Faktiškai išdirbtos darbo valandos")
+    business_days = models.DecimalField(max_digits=6, decimal_places=2, default=0.00, help_text="Faktiškai išdirbtos darbo dienos")
 
     # Darbo pradžios ir pabaigos datos
     start_date = models.DateField()
@@ -129,56 +141,36 @@ class Contract(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    # Constants for work hours and days
-    HOURS_PER_WEEK = 40
-    DAYS_PER_WEEK = 5
-
-    def calculate_work_duration(self):
-        """Apskaičiuoja, kiek darbuotojas išdirbo valandų ir dienų."""
-        if not self.end_date:
-            return {"hours_worked": 0, "days_worked": 0}  # Jei nėra pabaigos datos, laikoma, kad nebaigta
-
-        work_days = (self.end_date - self.start_date).days
-        work_weeks = work_days / 7
-
-        hours_worked = work_weeks * self.HOURS_PER_WEEK
-        days_worked = work_weeks * self.DAYS_PER_WEEK
-
-        return {"hours_worked": round(hours_worked), "days_worked": round(days_worked)}
-
-    def calculate_profit(self):
+    def calculate_salary_and_expenses(self):
         """
-        Apskaičiuoja darbuotojo pelną, atsižvelgiant į jo tarifą ir menedžerio komisinius.
+        Apskaičiuoja darbuotojo užmokestį ir darbdavio išlaidas, atsižvelgiant į darbo valandas ir dienas.
         """
-        work_duration = self.calculate_work_duration()
-        hours_worked = work_duration["hours_worked"]
-        days_worked = work_duration["days_worked"]
-
-        # Ensure rates are not None by setting default values
-        employee_hourly_rate = self.employee_hourly_rate or 0
-        employee_daily_rate = self.employee_daily_rate or 0
-        employer_hourly_rate = self.employer_hourly_rate or 0
-        employer_daily_rate = self.employer_daily_rate or 0
-
         if self.employee_tariff_type == self.HOURLY:
-            employee_earnings = employee_hourly_rate * hours_worked
-            employer_payment = employer_hourly_rate * hours_worked
+            employee_earnings = self.employee_hourly_rate * self.worked_hours
+            employer_expense = self.employer_hourly_rate * self.worked_hours
         else:
-            employee_earnings = employee_daily_rate * days_worked
-            employer_payment = employer_daily_rate * days_worked
+            employee_earnings = self.employee_daily_rate * self.worked_days
+            employer_expense = self.employer_daily_rate * self.worked_days
 
         # Menedžerio komisinių atskaitymas
-        manager_fee = (self.manager_commission / 100) * employee_earnings if self.manager_commission else 0
-        net_profit = employee_earnings - manager_fee
+        manager_fee = (self.manager_commission / 100) * employee_earnings
+        net_salary = employee_earnings - manager_fee
+
+        # Pelnas
+        net_profit = employer_expense - net_salary
 
         return {
-            "hours_worked": hours_worked,
-            "days_worked": days_worked,
+            "worked_hours": self.worked_hours,
+            "worked_days": self.worked_days,
+            "business_hours": self.business_hours,
+            "business_days": self.business_days,
             "employee_earnings": employee_earnings,
-            "employer_payment": employer_payment,
+            "employer_expense": employer_expense,
             "manager_fee": manager_fee,
+            "net_salary": net_salary,
             "net_profit": net_profit
         }
 
     def __str__(self):
         return f"Sutartis: {self.employee} - {self.employer} ({self.start_date} - {self.end_date or 'Nežinoma'})"
+

@@ -17,20 +17,61 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .models import Contract
 
+import matplotlib.pyplot as plt
+import pandas as pd
+from io import BytesIO
+import base64
+from django.shortcuts import render
+from eor.models import Contract
+
+
+def net_profit_chart(request):
+    contracts = Contract.objects.all()
+
+    contracts_data = [
+        {"employer": contract.employer.company_name,
+         "net_profit": contract.calculate_salary_and_expenses()["net_profit"]}
+        for contract in contracts
+    ]
+
+    df = pd.DataFrame(contracts_data)
+    net_profit_per_employer = df.groupby("employer")["net_profit"].sum().reset_index()
+    net_profit_per_employer = net_profit_per_employer.sort_values(by="net_profit", ascending=False)
+
+    # Create the plot
+    plt.figure(figsize=(12, 6))
+    plt.barh(net_profit_per_employer["employer"], net_profit_per_employer["net_profit"])
+    plt.xlabel("Net Profit (€)")
+    plt.ylabel("Employer")
+    plt.title("Net Profit Per Employer")
+    plt.gca().invert_yaxis()
+    plt.grid(axis="x", linestyle="--", alpha=0.7)
+
+    # Save plot to a string buffer
+    buffer = BytesIO()
+    plt.savefig(buffer, format="png")
+    buffer.seek(0)
+    image_png = buffer.getvalue()
+    buffer.close()
+
+    # Encode plot to display in HTML
+    graphic = base64.b64encode(image_png).decode("utf-8")
+    return render(request, "eor/net_profit_chart.html", {"graphic": graphic})
+
+
 @login_required
 def contract_list(request):
     """
-    View to display all contracts and calculate profit.
+    View to display all contracts with detailed earnings and expenses calculation.
     """
     contracts = Contract.objects.all().order_by("-start_date")
 
-    # Calculate profits for each contract
-    contract_profits = []
+    contract_reports = []
     for contract in contracts:
-        profit_data = contract.calculate_profit()
-        contract_profits.append({"contract": contract, "profit": profit_data})
+        report_data = contract.calculate_salary_and_expenses()
+        contract_reports.append({"contract": contract, "report": report_data})
 
-    return render(request, "eor/contracts_list.html", {"contract_profits": contract_profits})
+    return render(request, "eor/contracts_list.html", {"contract_reports": contract_reports})
 
 def employee_assignment_list(request):
     assignments = EmployeeAssignment.objects.all()

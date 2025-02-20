@@ -10,4 +10,7 @@ urlpatterns = [
     path('assignments/', views.employee_assignment_list, name='employee_assignment_list'),
     path('cv/', views.employee_cv_list, name='employee_cv_list'),
     path("contracts/", views.contract_list, name="contract_list"),
+    path("charts/", views.net_profit_chart, name="net_profit_chart"),
+
+
 ]

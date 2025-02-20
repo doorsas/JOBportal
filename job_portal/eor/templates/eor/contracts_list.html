@@ -3,65 +3,45 @@
 
 
 {% block content %}
-    <h2>All Contracts</h2>
+    <h2>Contracts Overview</h2>
     <table border="1">
         <thead>
             <tr>
                 <th>Employee</th>
                 <th>Employer</th>
                 <th>Manager</th>
-                <th>Employee Tariff</th>
-                <th>Employer Tariff</th>
-                <th>Commission (%)</th>
-                <th>Start Date</th>
-                <th>End Date</th>
-                <th>Hours Worked</th>
-                <th>Days Worked</th>
+                <th>Worked Hours</th>
+                <th>Worked Days</th>
+                <th>Business Hours</th>
+                <th>Business Days</th>
                 <th>Employee Earnings</th>
-                <th>Employer Payment</th>
+                <th>Employer Expense</th>
                 <th>Manager Fee</th>
+                <th>Net Salary</th>
                 <th>Net Profit</th>
             </tr>
         </thead>
         <tbody>
-            {% for item in contract_profits %}
+            {% for item in contract_reports %}
                 <tr>
                     <td>{{ item.contract.employee }}</td>
                     <td>{{ item.contract.employer }}</td>
                     <td>{{ item.contract.manager|default:"No Manager" }}</td>
 
-                    <td>
-                        {{ item.contract.employee_tariff_type|title }}:
-                        {% if item.contract.employee_tariff_type == "hourly" %}
-                            ${{ item.contract.employee_hourly_rate }}/hour
-                        {% else %}
-                            ${{ item.contract.employee_daily_rate }}/day
-                        {% endif %}
-                    </td>
+                    <td>{{ item.report.worked_hours }}</td>
+                    <td>{{ item.report.worked_days }}</td>
+                    <td>{{ item.report.business_hours }}</td>
+                    <td>{{ item.report.business_days }}</td>
 
-                    <td>
-                        {{ item.contract.employer_tariff_type|title }}:
-                        {% if item.contract.employer_tariff_type == "hourly" %}
-                            ${{ item.contract.employer_hourly_rate }}/hour
-                        {% else %}
-                            ${{ item.contract.employer_daily_rate }}/day
-                        {% endif %}
-                    </td>
-
-                    <td>{{ item.contract.manager_commission }}%</td>
-                    <td>{{ item.contract.start_date }}</td>
-                    <td>{{ item.contract.end_date|default:"Ongoing" }}</td>
-
-                    <td>{{ item.profit.hours_worked }}</td>
-                    <td>{{ item.profit.days_worked }}</td>
-                    <td>${{ item.profit.employee_earnings }}</td>
-                    <td>${{ item.profit.employer_payment }}</td>
-                    <td>${{ item.profit.manager_fee }}</td>
-                    <td><strong>${{ item.profit.net_profit }}</strong></td>
+                    <td>Eur {{ item.report.employee_earnings }}</td>
+                    <td>Eur {{ item.report.employer_expense }}</td>
+                    <td>Eur {{ item.report.manager_fee }}</td>
+                    <td>Eur {{ item.report.net_salary }}</td>
+                    <td><strong>Eur {{ item.report.net_profit }}</strong></td>
                 </tr>
             {% empty %}
                 <tr>
-                    <td colspan="14">No contracts found.</td>
+                    <td colspan="11">No contracts found.</td>
                 </tr>
             {% endfor %}
         </tbody>
