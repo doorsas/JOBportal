@@ -6,6 +6,32 @@ from .models import Manager
 from datetime import date
 from django.db.models import Sum
 
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Contract
+
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Contract
+from django.shortcuts import render
+from django.contrib.auth.decorators import login_required
+from .models import Contract
+
+@login_required
+def contract_list(request):
+    """
+    View to display all contracts and calculate profit.
+    """
+    contracts = Contract.objects.all().order_by("-start_date")
+
+    # Calculate profits for each contract
+    contract_profits = []
+    for contract in contracts:
+        profit_data = contract.calculate_profit()
+        contract_profits.append({"contract": contract, "profit": profit_data})
+
+    return render(request, "eor/contracts_list.html", {"contract_profits": contract_profits})
+
 def employee_assignment_list(request):
     assignments = EmployeeAssignment.objects.all()
     return render(request, 'eor/employee_assignment_list.html', {'assignments': assignments})

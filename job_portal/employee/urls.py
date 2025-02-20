@@ -1,22 +1,18 @@
 from django.urls import path
 from . import views
 
-from .views import EmployeeRegistrationView
-
-
-
 
 app_name = 'employee'
 
 urlpatterns = [
     # Authentication
-    path('', views.index, name="index"),
+    path('index/', views.index, name="index"),
     path('search/', views.search, name="search"),
-    # path('', views.login_employee, name='login_employee'),
+    path('', views.login_employee, name='login_employee'),
     path('logout/', views.logout_employee, name='logout'),
 
     # Employee Registration & Dashboard
-    path('register/', EmployeeRegistrationView.as_view(), name='employee_register'),
+    path('register/', views.EmployeeRegistrationView.as_view(), name='employee_register'),
     path('registration-pending/', views.registration_pending, name='registration_pending'),
     path('registration-failed/', views.registration_failed, name='registration_failed'),
     path('employees_dashboard/', views.employee_dashboard, name='employee_dashboard'),

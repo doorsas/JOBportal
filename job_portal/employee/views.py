@@ -44,7 +44,8 @@ logger = logging.getLogger(__name__)
 
 
 def index(request):
-    return render(request, "employee/index.html")
+    vardas = 'Saulius'
+    return render(request, "employee/index.html", {'vardas': vardas})
 
 def search(request):
     q = request.GET.get('q')
@@ -56,7 +57,7 @@ def search(request):
         .order_by("user_id")[0:100]
         print (results)
     else:
-        results = []
+        results = Employee.objects.all()
         print(results)
 
     return render(request, "employee/partials/results.html", {"results": results})

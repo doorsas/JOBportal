@@ -1,0 +1,69 @@
+{% extends base_template %}
+
+
+
+{% block content %}
+    <h2>All Contracts</h2>
+    <table border="1">
+        <thead>
+            <tr>
+                <th>Employee</th>
+                <th>Employer</th>
+                <th>Manager</th>
+                <th>Employee Tariff</th>
+                <th>Employer Tariff</th>
+                <th>Commission (%)</th>
+                <th>Start Date</th>
+                <th>End Date</th>
+                <th>Hours Worked</th>
+                <th>Days Worked</th>
+                <th>Employee Earnings</th>
+                <th>Employer Payment</th>
+                <th>Manager Fee</th>
+                <th>Net Profit</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in contract_profits %}
+                <tr>
+                    <td>{{ item.contract.employee }}</td>
+                    <td>{{ item.contract.employer }}</td>
+                    <td>{{ item.contract.manager|default:"No Manager" }}</td>
+
+                    <td>
+                        {{ item.contract.employee_tariff_type|title }}:
+                        {% if item.contract.employee_tariff_type == "hourly" %}
+                            ${{ item.contract.employee_hourly_rate }}/hour
+                        {% else %}
+                            ${{ item.contract.employee_daily_rate }}/day
+                        {% endif %}
+                    </td>
+
+                    <td>
+                        {{ item.contract.employer_tariff_type|title }}:
+                        {% if item.contract.employer_tariff_type == "hourly" %}
+                            ${{ item.contract.employer_hourly_rate }}/hour
+                        {% else %}
+                            ${{ item.contract.employer_daily_rate }}/day
+                        {% endif %}
+                    </td>
+
+                    <td>{{ item.contract.manager_commission }}%</td>
+                    <td>{{ item.contract.start_date }}</td>
+                    <td>{{ item.contract.end_date|default:"Ongoing" }}</td>
+
+                    <td>{{ item.profit.hours_worked }}</td>
+                    <td>{{ item.profit.days_worked }}</td>
+                    <td>${{ item.profit.employee_earnings }}</td>
+                    <td>${{ item.profit.employer_payment }}</td>
+                    <td>${{ item.profit.manager_fee }}</td>
+                    <td><strong>${{ item.profit.net_profit }}</strong></td>
+                </tr>
+            {% empty %}
+                <tr>
+                    <td colspan="14">No contracts found.</td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}
