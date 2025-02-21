@@ -12,10 +12,10 @@ EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 EMAIL_HOST_USER = 'duomenuanalitikas@gmail.com'  # Your email address
 EMAIL_HOST_PASSWORD = os.getenv("GMAIL_K")  # Your email password
-print (EMAIL_HOST_PASSWORD)
+
 DEFAULT_FROM_EMAIL = 'duomenuanalitikas@gmail.com'
 
-AUTH_USER_MODEL = 'employee.CustomUser'
+
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -27,7 +27,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 # SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY")
-print (SECRET_KEY)
+
 # SECRET_KEY = 'django-insecure-l&)p@#euf5qyo)ar2rw9if6bd7g3z44$k0gyat1b!l&8yhy2hg'
 
 # SECURITY WARNING: don't run with debug turned on in production!
@@ -55,7 +55,7 @@ INSTALLED_APPS = [
 
 ]
 
-
+AUTH_USER_MODEL = 'employee.CustomUser'
 LOGIN_URL = '/'  # URL adresas prisijungimo puslapiui
 LOGIN_REDIRECT_URL = '/'  # Kur nukreipti vartotoją po sėkmingo prisijungimo
 LOGOUT_REDIRECT_URL = '/'  # Kur nukreipti vartotoją po atsijungimo

@@ -16,6 +16,7 @@ class CustomUser(AbstractUser):
     is_employee = models.BooleanField(default=False)
     is_manager = models.BooleanField(default=False)
 
+    # ✅ Restore groups and user_permissions to ensure Django Admin works correctly
     groups = models.ManyToManyField(Group, related_name="custom_users", blank=True)
     user_permissions = models.ManyToManyField(Permission, related_name="custom_users_permissions", blank=True)
 
@@ -25,6 +26,8 @@ class CustomUser(AbstractUser):
     class Meta:
         verbose_name = "User"
         verbose_name_plural = "Users"
+
+
 
     def __str__(self):
         return self.username
@@ -37,7 +40,6 @@ class CustomUser(AbstractUser):
             self.groups.add(Group.objects.get_or_create(name="Employees")[0])
         if self.is_manager:
             self.groups.add(Group.objects.get_or_create(name="Managers")[0])
-
 class Employee(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     citizenship = models.CharField(max_length=100, default="Unknown")

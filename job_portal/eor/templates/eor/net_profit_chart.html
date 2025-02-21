@@ -3,5 +3,11 @@
 {% block title %}Employer net chart{% endblock %}
 
 {% block content %}
-<div><img src="data:image/png;base64,{{ graphic }}" alt="Net Profit Chart"></div>
+<div class = "d-flex justify-content-center"><img src="data:image/png;base64,{{ graphic }}" alt="Net Profit Chart"></div>
+
+
+<div>
+        <div class = "d-flex justify-content-center" ><a href="{% url 'eor:contract_list' %}" class="btn btn-view-cv">Back to Contracts</a></div>
+
+</div>
 {% endblock %}

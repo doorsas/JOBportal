@@ -1,61 +1,95 @@
-
-from django.shortcuts import render
+import matplotlib
+matplotlib.use('Agg')
 from .models import EmployeeAssignment
 from employee.models import CV
-from .models import Manager
-from datetime import date
 from django.db.models import Sum
-
-from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
 from .models import Contract
-
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from .models import Contract
-from django.shortcuts import render
-from django.contrib.auth.decorators import login_required
-from .models import Contract
-
 import matplotlib.pyplot as plt
 import pandas as pd
 from io import BytesIO
 import base64
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from eor.models import Contract
 
 
 def net_profit_chart(request):
-    contracts = Contract.objects.all()
+    """
+    Generate a line chart comparing employer expenses and employee salaries over time.
+    Returns a rendered HTML page with the chart embedded.
+    """
+    # Optional: Filter contracts (e.g., by date range from request parameters)
+    contracts = Contract.objects.all()  # You could filter, e.g., Contract.objects.filter(start_date__year=2025)
 
+    if not contracts.exists():
+        # Handle case with no data
+        return render(request, "eor/net_profit_chart.html", {
+            "graphic": None,
+            "error": "No contract data available to display."
+        })
+
+    # Prepare data for plotting
     contracts_data = [
-        {"employer": contract.employer.company_name,
-         "net_profit": contract.calculate_salary_and_expenses()["net_profit"]}
+        {
+            "date": contract.start_date,
+            "employer": contract.employer.company_name,  # Assuming Employer has a 'company_name' field
+            "employee_salary": float(contract.calculate_salary_and_expenses()["net_salary"]),
+            "employer_expense": float(contract.calculate_salary_and_expenses()["employer_expense"]),
+        }
         for contract in contracts
     ]
 
+    # Create a DataFrame
     df = pd.DataFrame(contracts_data)
-    net_profit_per_employer = df.groupby("employer")["net_profit"].sum().reset_index()
-    net_profit_per_employer = net_profit_per_employer.sort_values(by="net_profit", ascending=False)
+
+    # Convert 'date' to datetime
+    df["date"] = pd.to_datetime(df["date"])
+
+    # Group by date and sum the values (aggregates multiple contracts per date)
+    df_grouped = df.groupby("date")[["employee_salary", "employer_expense"]].sum().reset_index()
 
     # Create the plot
     plt.figure(figsize=(12, 6))
-    plt.barh(net_profit_per_employer["employer"], net_profit_per_employer["net_profit"])
-    plt.xlabel("Net Profit (€)")
-    plt.ylabel("Employer")
-    plt.title("Net Profit Per Employer")
-    plt.gca().invert_yaxis()
-    plt.grid(axis="x", linestyle="--", alpha=0.7)
+    plt.plot(
+        df_grouped["date"],
+        df_grouped["employee_salary"],
+        marker="o",
+        linestyle="-",
+        color="green",
+        label="Employee Salary (€)"
+    )
+    plt.plot(
+        df_grouped["date"],
+        df_grouped["employer_expense"],
+        marker="s",
+        linestyle="-",
+        color="red",
+        label="Employer Expense (€)"
+    )
 
-    # Save plot to a string buffer
+    # Customize the plot
+    plt.xlabel("Date", fontsize=12)
+    plt.ylabel("Amount (€)", fontsize=12)
+    plt.title("Employee Salary vs Employer Expense Over Time", fontsize=14, pad=15)
+    plt.legend(loc="upper left")
+    plt.grid(True, linestyle="--", alpha=0.7)
+    plt.xticks(rotation=45, ha="right")  # 'ha' aligns rotated labels properly
+
+    # Adjust layout to prevent clipping
+    plt.tight_layout()
+
+    # Save plot to a BytesIO buffer
     buffer = BytesIO()
-    plt.savefig(buffer, format="png")
+    plt.savefig(buffer, format="png", dpi=100)  # DPI controls resolution
     buffer.seek(0)
     image_png = buffer.getvalue()
     buffer.close()
+    plt.close()  # Close the figure to free memory
 
-    # Encode plot to display in HTML
+    # Encode the image as base64
     graphic = base64.b64encode(image_png).decode("utf-8")
+
+    # Render the template with the chart
     return render(request, "eor/net_profit_chart.html", {"graphic": graphic})
 
 
@@ -216,3 +250,34 @@ def calculate_employee_profit(employee, start_date=None, end_date=None):
         'profit': profit,
         'profit_margin': (profit / total_employer_payments * 100) if total_employer_payments else 0
     }
+
+@login_required
+def employee_contracts(request):
+    if not request.user.groups.filter(name='Employee').exists():
+        return redirect('employee:home')  # Redirect to employee home or another page
+    # Assuming the employee is logged in
+    employee_contracts = Contract.objects.filter(employee=request.user.employee)
+    return render(request, 'eor/employee_contracts.html', {
+        'contracts': employee_contracts
+    })
+
+# View for Employer
+def employer_contracts(request):
+    # Check if the user belongs to the Employer group
+    if not request.user.groups.filter(name='Employer').exists():
+        return redirect('employee:home')  # Redirect to employee home or another page
+
+
+
+    employer_contracts = Contract.objects.filter(employer=request.user.employer)
+    return render(request, 'eor/employer_contracts.html', {
+        'contracts': employer_contracts
+    })
+
+# View for Manager
+def manager_contracts(request):
+    # Assuming the manager is logged in
+    manager_contracts = Contract.objects.filter(manager=request.user.manager)
+    return render(request, 'eor/manager_contracts.html', {
+        'contracts': manager_contracts
+    })

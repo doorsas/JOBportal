@@ -1,0 +1,33 @@
+{% extends base_template %}
+
+
+
+{% block content %}
+  <h1>Your Contracts</h1>
+
+  <!-- Bootstrap Table for contracts -->
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th scope="col">Employer</th>
+        <th scope="col">Start Date</th>
+        <th scope="col">End Date</th>
+        <th scope="col">Worked Hours</th>
+        <th scope="col">Worked Days</th>
+        <th scope="col">Salary (EUR)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for contract in contracts %}
+        <tr>
+          <td>{{ contract.employer.company_name }}</td>
+          <td>{{ contract.start_date }}</td>
+          <td>{% if contract.end_date %} {{ contract.end_date }} {% else %} Ongoing {% endif %}</td>
+          <td>{{ contract.worked_hours }} hours</td>
+          <td>{{ contract.worked_days }} days</td>
+          <td>{{ contract.calculate_salary_and_expenses.net_salary }} EUR</td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% endblock %}

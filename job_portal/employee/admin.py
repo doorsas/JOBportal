@@ -1,19 +1,52 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth import get_user_model
-from .models import Employee, CV, JobApplication, Payment
+from .models import Employee, CV, JobApplication, Payment,CustomUser
 
-CustomUser = get_user_model()
 
-class CustomUserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'is_employer', 'is_employee', 'is_manager', 'is_staff', 'is_superuser')
-    list_filter = ('is_employer', 'is_employee', 'is_manager', 'is_staff', 'is_superuser')
-    fieldsets = UserAdmin.fieldsets +(
-        ('Roles', {'fields': ('is_employer', 'is_employee', 'is_manager')}),
-    )
 
 # Register CustomUser in Authentication section
+
+from django.contrib import admin
+from django.contrib.auth.admin import UserAdmin
+from .models import CustomUser
+
+
+# Define a custom admin class for CustomUser
+class CustomUserAdmin(UserAdmin):
+    # Fields to display in the admin list view
+    list_display = ('email', 'username', 'is_employer', 'is_employee', 'is_manager', 'is_staff', 'is_active')
+    list_filter = ('is_employer', 'is_employee', 'is_manager', 'is_staff', 'is_active')
+
+    # Fields to include in the edit form
+    fieldsets = (
+        (None, {'fields': ('email', 'password')}),
+        ('Personal Info', {'fields': ('username', 'phone_number')}),
+        ('Roles', {'fields': ('is_employer', 'is_employee', 'is_manager')}),
+        ('Permissions', {'fields': ('is_active', 'is_staff', 'is_superuser', 'groups', 'user_permissions')}),
+    )
+
+    # Fields to include in the add user form
+    add_fieldsets = (
+        (None, {
+            'classes': ('wide',),
+            'fields': (
+            'email', 'username', 'phone_number', 'password1', 'password2', 'is_employer', 'is_employee', 'is_manager'),
+        }),
+    )
+
+    # Search and ordering
+    search_fields = ('email', 'username')
+    ordering = ('email',)
+
+    # Since we're using email as USERNAME_FIELD
+    filter_horizontal = ('groups', 'user_permissions',)
+
+
+# Register the CustomUser model with the custom admin class
 admin.site.register(CustomUser, CustomUserAdmin)
+
+
 
 @admin.register(Employee)
 class EmployeeAdmin(admin.ModelAdmin):

@@ -3,10 +3,14 @@
 
 
 {% block content %}
+<div class="d-flex justify-content-center">
     <h2>Contracts Overview</h2>
+    </div>
+        <div class="d-flex justify-content-center">
     <table border="1">
         <thead>
             <tr>
+                <th>ID</th>
                 <th>Employee</th>
                 <th>Employer</th>
                 <th>Manager</th>
@@ -24,6 +28,7 @@
         <tbody>
             {% for item in contract_reports %}
                 <tr>
+                    <td>{{ item.contract.id }}</td>
                     <td>{{ item.contract.employee }}</td>
                     <td>{{ item.contract.employer }}</td>
                     <td>{{ item.contract.manager|default:"No Manager" }}</td>
@@ -46,4 +51,8 @@
             {% endfor %}
         </tbody>
     </table>
+        </div>
+    <div class="d-flex justify-content-center"><a href="{% url 'eor:net_profit_chart' %}" class="btn btn-view-cv">View Charts</a></div>
+
+
 {% endblock %}

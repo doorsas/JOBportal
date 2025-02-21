@@ -4,11 +4,12 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import Sum
 from decimal import Decimal
-from django.conf import settings
 from django.db import models
 from django.conf import settings
+from django.core.exceptions import ValidationError
+from django.core.validators import MinValueValidator, MaxValueValidator
 
-User = get_user_model()
+
 
 
 class EmployeeAssignment(models.Model):
@@ -82,18 +83,12 @@ class DirectAgreements(models.Model):
         verbose_name = "Direct Agreement"
         verbose_name_plural = "Direct Agreements"
 
+    def __str__(self):
+        return f"{self.employer} - {self.employee} Agreement"
 
 
-from django.db import models
-from django.conf import settings
 
-from django.db import models
-from django.conf import settings
-from datetime import timedelta
 
-from django.db import models
-from django.conf import settings
-from datetime import timedelta
 
 class Contract(models.Model):
     """
@@ -114,24 +109,60 @@ class Contract(models.Model):
 
     # Darbuotojo tarifai
     employee_tariff_type = models.CharField(max_length=10, choices=TARIFF_CHOICES, default=HOURLY)
-    employee_hourly_rate = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Darbuotojo valandinis tarifas")
-    employee_daily_rate = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Darbuotojo dienos tarifas")
+    employee_hourly_rate = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.00,
+        help_text="Darbuotojo valandinis tarifas",
+        validators=[MinValueValidator(0)]
+    )
+    employee_daily_rate = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.00,
+        help_text="Darbuotojo dienos tarifas",
+        validators=[MinValueValidator(0)]
+    )
 
     # Darbdavio tarifai
     employer_tariff_type = models.CharField(max_length=10, choices=TARIFF_CHOICES, default=HOURLY)
-    employer_hourly_rate = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Darbdavio valandinis tarifas")
-    employer_daily_rate = models.DecimalField(max_digits=10, decimal_places=2, default=0.00, help_text="Darbdavio dienos tarifas")
+    employer_hourly_rate = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.00,
+        help_text="Darbdavio valandinis tarifas",
+        validators=[MinValueValidator(0)]
+    )
+    employer_daily_rate = models.DecimalField(
+        max_digits=10, decimal_places=2, default=0.00,
+        help_text="Darbdavio dienos tarifas",
+        validators=[MinValueValidator(0)]
+    )
 
     # Menedžerio komisinių tarifas (%)
-    manager_commission = models.DecimalField(max_digits=5, decimal_places=2, default=0.00, help_text="Menedžerio komisinių procentas")
+    manager_commission = models.DecimalField(
+        max_digits=5, decimal_places=2, default=0.00,
+        help_text="Menedžerio komisinių procentas (0-100)",
+        validators=[MinValueValidator(0), MaxValueValidator(100)]
+    )
 
     # Dirbtos valandos ir dienos (saugomos rankiniu būdu arba automatiškai skaičiuojamos)
-    worked_hours = models.DecimalField(max_digits=6, decimal_places=2, default=0.00, help_text="Faktiškai išdirbtos valandos")
-    worked_days = models.DecimalField(max_digits=6, decimal_places=2, default=0.00, help_text="Faktiškai išdirbtos dienos")
+    worked_hours = models.DecimalField(
+        max_digits=6, decimal_places=2, default=0.00,
+        help_text="Faktiškai išdirbtos valandos",
+        validators=[MinValueValidator(0)]
+    )
+    worked_days = models.DecimalField(
+        max_digits=6, decimal_places=2, default=0.00,
+        help_text="Faktiškai išdirbtos dienos",
+        validators=[MinValueValidator(0)]
+    )
 
     # Dirbtos darbo valandos ir darbo dienos (atsižvelgiant į darbo grafiką)
-    business_hours = models.DecimalField(max_digits=6, decimal_places=2, default=0.00, help_text="Faktiškai išdirbtos darbo valandos")
-    business_days = models.DecimalField(max_digits=6, decimal_places=2, default=0.00, help_text="Faktiškai išdirbtos darbo dienos")
+    business_hours = models.DecimalField(
+        max_digits=6, decimal_places=2, default=0.00,
+        help_text="Faktiškai išdirbtos darbo valandos",
+        validators=[MinValueValidator(0)]
+    )
+    business_days = models.DecimalField(
+        max_digits=6, decimal_places=2, default=0.00,
+        help_text="Faktiškai išdirbtos darbo dienos",
+        validators=[MinValueValidator(0)]
+    )
 
     # Darbo pradžios ir pabaigos datos
     start_date = models.DateField()
@@ -141,29 +172,48 @@ class Contract(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
+    def clean(self):
+        """
+        Validate that tariff rates match their respective tariff types.
+        """
+        # Employee tariff validation
+        if self.employee_tariff_type == self.HOURLY and self.employee_hourly_rate <= 0:
+            raise ValidationError("Employee hourly rate must be greater than 0 for hourly tariff.")
+        if self.employee_tariff_type == self.DAILY and self.employee_daily_rate <= 0:
+            raise ValidationError("Employee daily rate must be greater than 0 for daily tariff.")
+
+        # Employer tariff validation
+        if self.employer_tariff_type == self.HOURLY and self.employer_hourly_rate <= 0:
+            raise ValidationError("Employer hourly rate must be greater than 0 for hourly tariff.")
+        if self.employer_tariff_type == self.DAILY and self.employer_daily_rate <= 0:
+            raise ValidationError("Employer daily rate must be greater than 0 for daily tariff.")
+
+        # Ensure end_date is not before start_date
+        if self.end_date and self.end_date < self.start_date:
+            raise ValidationError("End date cannot be earlier than start date.")
+
     def calculate_salary_and_expenses(self):
-        """
-        Apskaičiuoja darbuotojo užmokestį ir darbdavio išlaidas, atsižvelgiant į darbo valandas ir dienas.
-        """
+        worked_hours = self.worked_hours or Decimal(0)
+        worked_days = self.worked_days or Decimal(0)
+        employee_hourly_rate = self.employee_hourly_rate or Decimal(0)
+        employee_daily_rate = self.employee_daily_rate or Decimal(0)
+        employer_hourly_rate = self.employer_hourly_rate or Decimal(0)
+        employer_daily_rate = self.employer_daily_rate or Decimal(0)
+
         if self.employee_tariff_type == self.HOURLY:
-            employee_earnings = self.employee_hourly_rate * self.worked_hours
-            employer_expense = self.employer_hourly_rate * self.worked_hours
+            employee_earnings = employee_hourly_rate * worked_hours
+            employer_expense = employer_hourly_rate * worked_hours
         else:
-            employee_earnings = self.employee_daily_rate * self.worked_days
-            employer_expense = self.employer_daily_rate * self.worked_days
+            employee_earnings = employee_daily_rate * worked_days
+            employer_expense = employer_daily_rate * worked_days
 
-        # Menedžerio komisinių atskaitymas
-        manager_fee = (self.manager_commission / 100) * employee_earnings
+        manager_fee = (self.manager_commission / 100) * employee_earnings if self.manager_commission else Decimal(0)
         net_salary = employee_earnings - manager_fee
-
-        # Pelnas
         net_profit = employer_expense - net_salary
 
         return {
-            "worked_hours": self.worked_hours,
-            "worked_days": self.worked_days,
-            "business_hours": self.business_hours,
-            "business_days": self.business_days,
+            "worked_hours": worked_hours,
+            "worked_days": worked_days,
             "employee_earnings": employee_earnings,
             "employer_expense": employer_expense,
             "manager_fee": manager_fee,
@@ -171,6 +221,6 @@ class Contract(models.Model):
             "net_profit": net_profit
         }
 
-    def __str__(self):
-        return f"Sutartis: {self.employee} - {self.employer} ({self.start_date} - {self.end_date or 'Nežinoma'})"
+
+
 
