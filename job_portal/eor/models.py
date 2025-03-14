@@ -107,6 +107,15 @@ class Contract(models.Model):
         (DAILY, "Už dieną"),
     ]
 
+    # Tarifo tipai
+    PAID = "Paid"
+    PENDING = "Pending"
+
+    PAYMENT_STATUS = [
+        (PAID, 'Paid'),
+        (PENDING,'Pending'),
+    ]
+
     # Darbuotojo tarifai
     employee_tariff_type = models.CharField(max_length=10, choices=TARIFF_CHOICES, default=HOURLY)
     employee_hourly_rate = models.DecimalField(
@@ -171,6 +180,8 @@ class Contract(models.Model):
     # Automatiniai laikai
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
+
+    payment_status = models.CharField(max_length=10, choices=PAYMENT_STATUS, default= PENDING)
 
     def clean(self):
         """

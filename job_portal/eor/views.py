@@ -256,6 +256,7 @@ def employee_contracts(request):
     if not request.user.groups.filter(name='Employee').exists():
         return redirect('employee:home')  # Redirect to employee home or another page
     # Assuming the employee is logged in
+
     employee_contracts = Contract.objects.filter(employee=request.user.employee)
     return render(request, 'eor/employee_contracts.html', {
         'contracts': employee_contracts
@@ -264,14 +265,15 @@ def employee_contracts(request):
 # View for Employer
 def employer_contracts(request):
     # Check if the user belongs to the Employer group
+
     if not request.user.groups.filter(name='Employer').exists():
         return redirect('employee:home')  # Redirect to employee home or another page
 
-
-
-    employer_contracts = Contract.objects.filter(employer=request.user.employer)
+    employer = request.user.employer
+    employer_contracts = Contract.objects.filter(employer=employer)
     return render(request, 'eor/employer_contracts.html', {
-        'contracts': employer_contracts
+        'contracts': employer_contracts,
+        'employer' : employer
     })
 
 # View for Manager

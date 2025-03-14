@@ -39,7 +39,7 @@ BASE_URL = "https://example.com"
 # Application definition
 
 INSTALLED_APPS = [
-    'django_extensions',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -49,9 +49,11 @@ INSTALLED_APPS = [
     'employer',
     'employee',
     'eor',
+    'django_extensions',
     'widget_tweaks',
     'phonenumber_field',
     'django_countries',
+
 
 ]
 

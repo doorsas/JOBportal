@@ -3,76 +3,91 @@
 {% block title %}Employee Dashboard - {{ username }}{% endblock %}
 
 {% block content %}
-<div class="dashboard-container">
+<div class="max-w-5xl mx-auto p-6 bg-gray-100 min-h-screen">
+
     <!-- Welcome Section -->
-    <div class="welcome-section">
-        <h1>Welcome, {{ username }}</h1>
+    <div class="bg-blue-500 text-white text-center py-6 rounded-lg shadow-md mb-6">
+        <h1 class="text-3xl font-semibold">Welcome, {{ employee.user.first_name }}</h1>
     </div>
 
-    <div class="dashboard-content">
+    <div class="bg-white p-6 rounded-lg shadow-md">
+        
         <!-- Employee Details Section -->
-        <section class="info-section">
-            <h2>Personal Information</h2>
-            <div class="info-grid">
-                <div class="info-item">
-                    <span class="label">Name</span>
-                    <span class="value">{{ employee.employee_name }}</span>
+        <section class="mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 border-b pb-2 mb-4">Personal Information</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="p-4 bg-gray-50 rounded-lg shadow">
+                    <span class="text-gray-500 text-sm">Name</span>
+                    <p class="text-lg font-medium">{{ employee.user.first_name }}</p>
                 </div>
-                <div class="info-item">
-                    <span class="label">Email</span>
-                    <span class="value">{{ employee.email }}</span>
+                <div class="p-4 bg-gray-50 rounded-lg shadow">
+                    <span class="text-gray-500 text-sm">Email</span>
+                    <p class="text-lg font-medium">{{ employee.user.email }}</p>
                 </div>
-                <div class="info-item">
-                    <span class="label">Phone</span>
-                    <span class="value">{{ employee.phone_number }}</span>
+                <div class="p-4 bg-gray-50 rounded-lg shadow col-span-1 sm:col-span-2">
+                    <span class="text-gray-500 text-sm">Phone</span>
+                    <p class="text-lg font-medium">{{ employee.phone_number }}</p>
                 </div>
             </div>
         </section>
 
         <!-- CV Details Section -->
         {% if cv %}
-        <section class="info-section">
-            <h2>CV Details</h2>
-            <div class="info-grid">
-                <div class="info-item">
-                    <span class="label">Education</span>
-                    <span class="value">{{ cv.education }}</span>
+        <section class="mb-6">
+            <h2 class="text-xl font-semibold text-gray-700 border-b pb-2 mb-4">CV Details</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div class="p-4 bg-gray-50 rounded-lg shadow">
+                    <span class="text-gray-500 text-sm">Education</span>
+                    <p class="text-lg font-medium">{{ cv.education }}</p>
                 </div>
-                <div class="info-item">
-                    <span class="label">Experience</span>
-                    <span class="value">{{ cv.experience }}</span>
+                <div class="p-4 bg-gray-50 rounded-lg shadow">
+                    <span class="text-gray-500 text-sm">Experience</span>
+                    <p class="text-lg font-medium">{{ cv.experience }}</p>
                 </div>
-                <div class="info-item">
-                    <span class="label">Skills</span>
-                    <span class="value">{{ cv.skills }}</span>
+                <div class="p-4 bg-gray-50 rounded-lg shadow">
+                    <span class="text-gray-500 text-sm">Skills</span>
+                    <p class="text-lg font-medium">{{ cv.skills }}</p>
                 </div>
-                <div class="info-item">
-                    <span class="label">Created</span>
-                    <span class="value">{{ cv.created_at }}</span>
+                <div class="p-4 bg-gray-50 rounded-lg shadow">
+                    <span class="text-gray-500 text-sm">Created</span>
+                    <p class="text-lg font-medium">{{ cv.created_at }}</p>
                 </div>
             </div>
         </section>
 
-        <!-- Action Buttons -->
-        <section class="action-section">
-            <div class="primary-actions">
-                <a href="{% url 'employee:cv_detail' cv.id %}" class="btn-primary">View CV</a>
-                <a href="{% url 'employee:create_or_edit_cv' %}" class="btn-secondary">Edit CV</a>
-                <a href="{% url 'employee:employee_edit' employee.id %}" class="btn-secondary">Edit Profile</a>
-                <a href="{% url 'employee:user_calendar' %}" class="btn-secondary">Calendar</a>
-            </div>
+<!-- Action Buttons -->
+<section class="mb-6">
+    <div class="flex flex-wrap gap-4 justify-center">
+        <button onclick="location.href='{% url 'employee:cv_detail' cv.id %}'" class="px-6 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600">
+            View CV
+        </button>
+        <button onclick="location.href='{% url 'employee:create_or_edit_cv' %}'" class="px-6 py-2 bg-yellow-500 text-white rounded-lg shadow-md hover:bg-yellow-600">
+            Edit CV
+        </button>
+        <button onclick="location.href='{% url 'employee:employee_edit' employee.id %}'" class="px-6 py-2 bg-green-500 text-white rounded-lg shadow-md hover:bg-green-600">
+            Edit Profile
+        </button>
+        <button onclick="location.href='{% url 'employee:user_calendar' %}'" class="px-6 py-2 bg-purple-500 text-white rounded-lg shadow-md hover:bg-purple-600">
+            Calendar
+        </button>
+    </div>
 
-            <div class="secondary-actions">
-                <a href="{% url 'employee:generate_pdf' %}" class="btn-outline">Agreement Example</a>
-                <a href="{% url 'employer:employee-agreements' %}" class="btn-outline">My Agreements</a>
-            </div>
-        </section>
+    <div class="flex flex-wrap gap-4 justify-center mt-4">
+        <button onclick="location.href='{% url 'employee:generate_pdf' %}'" class="px-6 py-2 border border-gray-400 text-gray-700 rounded-lg shadow-md hover:bg-gray-200">
+            Agreement Example
+        </button>
+        <button onclick="location.href='{% url 'employer:employee-agreements' %}'" class="px-6 py-2 border border-gray-400 text-gray-700 rounded-lg shadow-md hover:bg-gray-200">
+            My Agreements
+        </button>
+    </div>
+</section>
+
 
         {% else %}
-        <section class="info-section">
-            <p class="no-cv-message">No CV available. Create your CV to get started.</p>
-            <div class="action-section">
-                <a href="{% url 'employee:user_calendar' %}" class="btn-primary">User Calendar</a>
+        <section class="text-center bg-red-100 text-red-600 p-6 rounded-lg shadow-md">
+            <p class="text-lg font-medium">No CV available. Create your CV to get started.</p>
+            <div class="mt-4">
+                <a href="{% url 'employee:user_calendar' %}" class="px-6 py-2 bg-blue-500 text-white rounded-lg shadow-md hover:bg-blue-600">User Calendar</a>
             </div>
         </section>
         {% endif %}

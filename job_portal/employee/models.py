@@ -6,6 +6,9 @@ from datetime import date, timedelta
 from phonenumber_field.modelfields import PhoneNumberField
 from django.contrib.auth.models import AbstractUser, Group, Permission
 from django.conf import settings
+from django.core.validators import FileExtensionValidator, MinValueValidator
+from django.core.exceptions import ValidationError
+from django.utils.translation import gettext_lazy as _
 
 # User = get_user_model()
 class CustomUser(AbstractUser):
@@ -16,7 +19,6 @@ class CustomUser(AbstractUser):
     is_employee = models.BooleanField(default=False)
     is_manager = models.BooleanField(default=False)
 
-    # ✅ Restore groups and user_permissions to ensure Django Admin works correctly
     groups = models.ManyToManyField(Group, related_name="custom_users", blank=True)
     user_permissions = models.ManyToManyField(Permission, related_name="custom_users_permissions", blank=True)
 
@@ -26,8 +28,6 @@ class CustomUser(AbstractUser):
     class Meta:
         verbose_name = "User"
         verbose_name_plural = "Users"
-
-
 
     def __str__(self):
         return self.username
@@ -40,16 +40,29 @@ class CustomUser(AbstractUser):
             self.groups.add(Group.objects.get_or_create(name="Employees")[0])
         if self.is_manager:
             self.groups.add(Group.objects.get_or_create(name="Managers")[0])
+
 class Employee(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     citizenship = models.CharField(max_length=100, default="Unknown")
-    national_id = models.CharField(max_length=50, blank=True, null=True, unique=True)
+    national_id = models.CharField(
+        max_length=50, 
+        blank=True, 
+        null=True, 
+        unique=True,
+        help_text=_("Government issued ID number")
+    )
     receive_special_offers = models.BooleanField(default=False)
     is_email_verified = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"{self.user.first_name or ''} {self.user.last_name or ''}".strip()
 
+    class Meta:
+        indexes = [
+            models.Index(fields=['national_id']),
+        ]
 
 class CV(models.Model):
     employee = models.OneToOneField(Employee, on_delete=models.CASCADE)
@@ -67,11 +80,22 @@ class CV(models.Model):
     other_relevant_information = models.TextField(verbose_name="Other Relevant Information")
     characteristics = models.TextField(verbose_name="Characteristics")
     hobby = models.TextField(verbose_name="Hobby")
-    attachment = models.FileField(upload_to='cv_attachments/', blank=True, null=True, verbose_name="Attachment")
+    attachment = models.FileField(
+        upload_to='cv_attachments/',
+        blank=True,
+        null=True,
+        verbose_name="Attachment",
+        validators=[FileExtensionValidator(allowed_extensions=['pdf', 'doc', 'docx'])]
+    )
+    updated_at = models.DateTimeField(auto_now=True)
 
     def __str__(self):
         return f"CV of {self.employee}"
 
+    def clean(self):
+        super().clean()
+        if self.date_of_birth > date.today():
+            raise ValidationError(_("Date of birth cannot be in the future"))
 
 class JobApplication(models.Model):
     STATUS_CHOICES = [
@@ -106,7 +130,11 @@ class Payment(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     employee = models.ForeignKey(Employee, on_delete=models.CASCADE, related_name="payments")
     invoice_number = models.CharField(max_length=50, unique=True)
-    amount = models.DecimalField(max_digits=10, decimal_places=2)
+    amount = models.DecimalField(
+        max_digits=10, 
+        decimal_places=2,
+        validators=[MinValueValidator(0.01)]
+    )
     currency = models.CharField(max_length=10, default="EUR")
     invoice_date = models.DateField(default=now)
     payment_date = models.DateField(null=True, blank=True)
@@ -123,6 +151,20 @@ class Payment(models.Model):
 
     def __str__(self):
         return f"Invoice {self.invoice_number} - {self.mokejimo_tipas} ({self.amount} {self.currency})"
+
+    def save(self, *args, **kwargs):
+        if not self.invoice_number:
+            # Generate invoice number: YYYY-MM-{random_4_digits}
+            year_month = self.invoice_date.strftime('%Y-%m')
+            random_digits = str(uuid.uuid4().int)[:4]
+            self.invoice_number = f"{year_month}-{random_digits}"
+        super().save(*args, **kwargs)
+
+    @property
+    def is_overdue(self):
+        if self.payment_date and not self.payment_status:
+            return date.today() > self.payment_date
+        return False
 
 # In the Payment model, automate invoice generation using
 # a library like reportlab or weasyprint to generate PDF invoices dynamically.
